@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy import CHAR, VARCHAR, Column, Integer, String, UUID, Enum
 import enum
 
-from models.customers import Customer
+
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from models.base import Base
@@ -54,8 +54,6 @@ class User(Base):
     events: Mapped[List["Event"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
-    # sales = relationship("Customer", back_populates="user")
-    # contracts: Mapped[List["Contract"]] = relationship(back_populates="user")
 
     def __init__(
         self,

@@ -1,10 +1,14 @@
 from controllers.main_controller import MainController
-from database import init_db
+from database import init_db, database_exists, create_database
 
 # Programme principal
 if __name__ == "__main__":
+    session = init_db()
+    if not database_exists():
+        create_database()
 
-    init_db()  # Obtenir une session SQLAlchemy
-    main_controller = MainController()
+    main_controller = MainController(session)
+    main_controller.create_admin()
 
     print("Arrêt du programme")
+    session.close()

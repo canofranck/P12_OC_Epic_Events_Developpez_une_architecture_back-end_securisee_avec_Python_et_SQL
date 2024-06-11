@@ -19,12 +19,12 @@ class Contract(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     # Relation with Users:
     manager_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    user: Mapped["User"] = relationship(back_populates="contract")
+    manager: Mapped["User"] = relationship(back_populates="contract")
 
     # Relation with Customers:
 
     customer_id: Mapped[int] = mapped_column(ForeignKey("customers.id"))
-    user: Mapped["Customer"] = relationship(back_populates="contract")
+    customer: Mapped["Customer"] = relationship(back_populates="contract")
 
     total_amount = Column(Float, nullable=False)
     remaining_amount = Column(Float, nullable=False)
