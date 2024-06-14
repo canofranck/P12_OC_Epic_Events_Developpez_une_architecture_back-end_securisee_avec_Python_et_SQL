@@ -24,7 +24,7 @@ class Customer(Base):
 
     # Relation with User:
     sales_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    user: Mapped["User"] = relationship(back_populates="customer")
+    user: Mapped["User"] = relationship(back_populates="customers")
 
     # Relation with Contract
     contracts: Mapped[List["Contract"]] = relationship(

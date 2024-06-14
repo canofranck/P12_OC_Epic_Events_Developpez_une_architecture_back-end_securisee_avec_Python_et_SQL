@@ -1,11 +1,16 @@
-from models.user import User, UserRole, create_hash_password
+from models.user import User, UserRole
 from views.main_view import MainView
+from views.user_view import UserView
 
 from controllers.user_controller import UserController
 
 # from controllers.report_controller import ReportController
 # from controllers.tournament_controller import TournamentController
 import constantes
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 class MainController:
@@ -13,8 +18,8 @@ class MainController:
 
     def __init__(self, session):
         self.session = session
-
-        # self.user_controller = UserController()
+        self.main_view = MainView()
+        self.user_controller = UserController(session, user_view=UserView)
 
     def run(self):
         """Lance l'application principale.
@@ -31,7 +36,7 @@ class MainController:
         """
 
         while True:
-            self.main_view.clear_screen()
+            # self.main_view.clear_screen()
             choice = self.main_view.display_main_menu()
 
             if choice == constantes.MAIN_MENU_LOGIN:
@@ -43,25 +48,25 @@ class MainController:
                 self.main_view.display_invalid_option_message()
 
     def create_admin(self):
-        # Vérifier si l'utilisateur Admin existe déjà
-        print("je suis dans CREATE ADMINNNNNNNNNNNNNNNNNNNNN")
+        logger.info("Je suis dans CREATE ADMIN")
         admin_user = (
             self.session.query(User).filter_by(username="Admin").first()
         )
         if admin_user:
-            print("L'utilisateur Admin existe déjà.")
-            return
+            logger.info("L'utilisateur admin existe dans la base de données.")
+        else:
+            logger.info(
+                "L'utilisateur admin n'existe pas dans la base de données."
+            )
 
-        # Créer l'utilisateur Admin avec le rôle MANAGER
-        admin = User(
-            username="Admin",
-            password=create_hash_password("adminoc"),
-            full_name="Admin User",
-            email="admin@example.com",
-            phone_number="1234567890",
-            role=UserRole.MANAGER,
-        )
-
-        self.session.add(admin)
-        self.session.commit()
-        print("Utilisateur Admin créé avec succès.")
+            admin = User(
+                username="Admin",
+                full_name="Admin User",
+                email="admin@example.com",
+                phone_number="1234567890",
+                role=UserRole.MANAGER,
+            )
+            admin.set_password("adminoc")
+            self.session.add(admin)
+            self.session.commit()
+            logger.info("Utilisateur Admin créé avec succès.")

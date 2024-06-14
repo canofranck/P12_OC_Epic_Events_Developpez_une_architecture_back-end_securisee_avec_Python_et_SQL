@@ -44,3 +44,11 @@ REPORT_MENU_LISTE_DATE_TOURNOI = "3"
 REPORT_MENU_LISTE_JOUEUR_TOURNOI = "4"
 REPORT_MENU_LISTE_ROUND_MATCH_TOURNOI = "5"
 REPORT_MENU_QUIT = "0"
+
+# ERROR
+
+ERR_USER_NOT_FOUND = "USER not found"
+ERR_USER_NO_ROLE = (
+    "This USER has no role, he cannot interact with the application"
+)
+ERR_CUSTOMER_NOT_FOUND = "Customer not found"

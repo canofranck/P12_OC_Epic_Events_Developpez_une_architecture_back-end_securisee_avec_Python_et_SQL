@@ -11,6 +11,7 @@ from datetime import datetime
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from models.base import Base
+from models.user import User
 
 
 class Contract(Base):
@@ -19,12 +20,12 @@ class Contract(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     # Relation with Users:
     manager_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    manager: Mapped["User"] = relationship(back_populates="contract")
+    user: Mapped["User"] = relationship(back_populates="contracts")
 
     # Relation with Customers:
 
     customer_id: Mapped[int] = mapped_column(ForeignKey("customers.id"))
-    customer: Mapped["Customer"] = relationship(back_populates="contract")
+    customer: Mapped["Customer"] = relationship(back_populates="contracts")
 
     total_amount = Column(Float, nullable=False)
     remaining_amount = Column(Float, nullable=False)
@@ -32,7 +33,7 @@ class Contract(Base):
     is_signed = Column(Boolean, default=False, nullable=False)
 
     # Relation with Events one to one :
-    events: Mapped["Event"] = relationship(
+    event: Mapped["Event"] = relationship(
         back_populates="contract", uselist=False
     )
 

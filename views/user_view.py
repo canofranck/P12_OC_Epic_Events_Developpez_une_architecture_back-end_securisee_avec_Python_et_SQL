@@ -1,3 +1,10 @@
-class UserView:
+import models
+import views
 
-    pass
+
+class UserView:
+    def input_email(self):
+        return input("Entrez votre email: ")
+
+    def input_password(self):
+        return input("Entrez votre mot de passe: ")

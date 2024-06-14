@@ -10,7 +10,7 @@ class Event(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     # Relation with Users:
     support_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    support: Mapped["User"] = relationship(back_populates="event")
+    user: Mapped["User"] = relationship(back_populates="events")
 
     # relation with Contracts one to one :
     contract_id: Mapped[int] = mapped_column(
