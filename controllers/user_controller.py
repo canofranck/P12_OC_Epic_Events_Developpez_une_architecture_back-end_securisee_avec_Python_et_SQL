@@ -1,120 +1,170 @@
 import models
 import bcrypt
-import models.user
-from views import main_view, user_view
-from models.user import User
+
+
 import constantes
 import logging
-from views.user_view import UserView
+import validators
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+# logging.basicConfig(level=logging.DEBUG)
+# logger = logging.getLogger(__name__)
+
+salt = b"$2b$12$QhTfGmCB1FrbuySv8Op4IO"
 
 
 class UserController:
     """Contrôleur pour la gestion des joueurs."""
 
-    def __init__(self, session, user_view):
+    def __init__(self, session, view, user=None):
         self.session = session
-        self.user_view = user_view
+        self.view = view
+        self.user = user
 
     def run_login_menu(self):
-        try:
+        while True:
+            email = self.view.input_email()
 
-            email = UserView.input_email(self)
-            password = UserView.input_password(self)
-            logger.debug("Tentative de connexion avec l'email: %s", email)
-            user = self.session.query(User).filter_by(email=email).first()
+            user = (
+                self.session.query(models.User).filter_by(email=email).first()
+            )
             if user is None:
-                raise ValueError(constantes.ERR_USER_NOT_FOUND)
-            print("Mot de passe stocké en BD:", user.password)  # Débogage
-            print("Mot de passe saisi:", password)  # Débogage
-            logger.debug(f"Mot de passe crypté dans la BD: {user.password}")
-            if not user.is_password_correct(password):
-                raise ValueError(constantes.ERR_USER_NOT_FOUND)
-            self.user = user
-            logger.debug("Utilisateur connecté avec succès: %s", user.username)
-            return user
-        except Exception as e:
-            logger.error("Erreur lors de la tentative de connexion: %s", e)
-            raise
+                print(constantes.ERR_USER_NOT_FOUND)
+                continue
+            while True:
+                password = self.view.input_password()
+                if not self.is_password_correct(password, user):
+                    print("Bad password. Please try again.")
+                    continue
+                self.user = user
+                return user
 
+    def manage_user(self):
+        selection = self.view.input_user_management()
+        print(
+            "retour affichage de input user management selection=", selection
+        )
+        match selection:
+            case 0:
+                return
+            case 1:
+                self.create_user()
+            case 2:
+                self.update_user()
+            case 3:
+                self.delete_user()
+            case _:
+                print("input invalide")
+        return
 
-# def run_player_menu(self):
-#     """Exécute le menu des joueurs.
-#     Cette méthode permet de gérer les actions du menu des joueurs,
-#     notamment l'ajout de nouveaux joueurs, l'affichage de la liste des
-#     joueurs et la sortie du menu.
-#     Args:
-#         main_view (obj): La vue principale de l'application.
-#     Returns:
-#         Aucune valeur de retour.
-#     Raises:
-#         Aucune exception n'est levée.
-#     """
-# self.main_view.clear_screen()
-# while True:
-#     choice = self.player_view.display_player_menu()
+    def create_user(self):
+        self.view.display_new_user_panel()
+        new_user = models.User(
+            email=self.set_new_user_email(),
+            password=self.set_new_user_password(),
+            role=self.view.input_user_role(),
+            username=self.view.input_username(),
+            full_name=self.view.input_full_name(),
+            phone_number=self.set_user_phone(),
+        )
+        try:
+            self.session.add(new_user)
+            self.session.commit()
+            return self.view.display_new_user_validation()
+        except Exception as err:
+            self.session.rollback()
+            return print("error", err)
 
-#     if choice == constantes.PLAYER_MENU_NOUVEAU:
-#         self.add_player()
-#     elif choice == constantes.PLAYER_MENU_AFFICHER:
-#         self.display_players()
-#     elif choice == constantes.PLAYER_MENU_QUIT:
-#         break
-#     else:
-#         self.player_view.display_invalid_option_message()
+    def set_new_user_email(self):
+        email = ""
+        while email == "":
+            try:
+                email_input = self.view.input_email()
+                validators.validate_email(email_input)
+                self.is_email_in_database(email_input)
+                email = email_input
+                continue
+            except ValueError as err:
+                print("error", err)
+                continue
+        return email
 
-# def add_player(self):
-#     """Ajoute un nouveau joueur.
-#     Cette méthode permet d'ajouter un nouveau joueur à la liste des
-#     joueurs. Elle vérifie également l'existence du joueur avant l'ajout.
-#     Args:
-#         Aucun argument requis.
-#     Returns:
-#         Aucune valeur de retour.
-#     Raises:
-#         Aucune exception n'est levée.
-#     """
-#     self.main_view.clear_screen()
-#     print("Ajout d'un nouveau joueur...")
-#     player_data = self.player_view.get_player_data()
-#     last_name = player_data["last_name"]
-#     first_name = player_data["first_name"]
-#     birth_date = player_data["birth_date"]
-#     player_id = player_data["player_id"]
-#     player_id_national = player_data["player_id_national"]
-#     score_tournament = player_data["score_tournament"]
-#     player = Player(
-#         last_name,
-#         first_name,
-#         birth_date,
-#         player_id,
-#         player_id_national,
-#         score_tournament,
-#     )
-#     # Vérifiez s'il y a des doublons en fonction de l'identifiant du joueur
+    def is_email_in_database(self, email):
+        if (
+            self.session.query(models.User).filter_by(email=email).first()
+            is not None
+        ):
+            print("email already exist")
 
-#     if Player.is_player_id_taken(player_id_national):
-#         print(
-#             "Le joueur existe déjà dans la base de données.Veuillez entrez un nouveau joueur"
-#         )
-#     else:
-#         player.save()
-#         print("Joueur ajouté avec succès dans la sauvegarde!")
+    def set_new_user_password(self):
+        password = ""
+        while password == "":
+            try:
+                password_input = self.view.input_password()
+                validators.validate_password(password_input)
+                password = password_input
+                continue
+            except ValueError as err:
+                self.view.display_error(err)
+                continue
+        return password
 
-# def display_players(self):
-#     """Affiche la liste des joueurs.
-#     Cette méthode affiche la liste de tous les joueurs par ordre
-#     alphabétique en fonction de leur nom de famille et de leur prénom.
-#     Args:
-#         Aucun argument requis.
-#     Returns:
-#         output_string (str): Une chaîne de caractères contenant la liste
-#                              de tous les joueurs.
-#     Raises:
-#         Aucune exception n'est levée.
-#     """
-#     self.main_view.clear_screen()
-#     players = Player.load_players()
-#     self.player_view.afficher_list(players)
+    def set_user_phone(self):
+        phone = ""
+        while phone == "":
+            try:
+                phone_input = self.view.input_phone_number()
+                validators.validate_phone(phone_input)
+                phone = phone_input
+                continue
+            except ValueError as err:
+                print("error", err)
+                continue
+        return phone
+
+    def update_user(self):
+        try:
+            user = self.get_user()
+            self.view.display_user_information(user)
+            update_user_input = self.view.input_update_user()
+
+            user.username = update_user_input["username"]
+            user.full_name = update_user_input["full_name"]
+            user.email = update_user_input["email"]
+            user.phone_number = update_user_input["phone_number"]
+            user.role = update_user_input["role"]
+            self.session.commit()
+            return self.view.display_update_user_validation()
+        except ValueError as err:
+            print("error", err)
+
+    def delete_user(self):
+        try:
+            user = self.get_user()
+            self.session.delete(user)
+            self.session.commit()
+            return self.view.display_delete_user_validation()
+        except ValueError:
+            return
+
+    def get_user(self):
+        email = self.view.input_email()
+        user = self.session.query(models.User).filter_by(email=email).first()
+
+        print("sql user", user)
+        if user is None:
+            print("user NOTFOUND")
+        return user
+
+    def manage_contract(self):
+        print("contract a faire")
+
+    def is_password_correct(self, input_password, user):
+        input_bytes = input_password.encode("utf-8")
+        hash_input_password = bcrypt.hashpw(input_bytes, salt)
+        # logger.debug(f"h input password: {input_bytes}")
+        # logger.debug(f"Mot de passe bd: {user.password}")
+        # logger.debug(f"Mot de passe user crypt : {hash_input_password}")
+        is_correct = hash_input_password == user.password.encode("utf-8")
+
+        # logger.debug(f"Le mot de passe saisi est correct: {is_correct}")
+        return is_correct

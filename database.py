@@ -9,8 +9,8 @@ from models.contract import Contract
 from models.event import Event
 import logging
 
-logging.basicConfig()
-logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
+# logging.basicConfig()
+# logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 
 config = configparser.ConfigParser()
 config.read("config.ini")

@@ -1,10 +1,11 @@
 from os import name, system
 import constantes
+import views
 
 
 class MainView:
-    @staticmethod
-    def display_main_menu():
+
+    def display_main_menu(self):
         """
         Affiche le menu principal.
         Returns:
@@ -16,14 +17,12 @@ class MainView:
         print(constantes.MAIN_MENU_QUIT, "Quitter")
         return input("Choisissez une option : ")
 
-    @staticmethod
     def display_invalid_option_message():
         """
         Affiche un message indiquant qu'une option invalide a été sélectionnée.
         """
         print("Option invalide. Veuillez choisir une option valide.")
 
-    @staticmethod
     def clear_screen():
         """Clear the terminal"""
         # for windows
@@ -34,3 +33,6 @@ class MainView:
 
         else:
             _ = system("clear")
+
+    def input_welcome_user(self, user):
+        print(f"--- Welcome Back {user.full_name} ---")

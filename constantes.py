@@ -5,12 +5,25 @@ MAIN_MENU_TOUNOI = "2"
 MAIN_MENU_REPORTS = "3"
 MAIN_MENU_QUIT = "0"
 
-# Player Menu
+# User Menu commun
 
-PLAYER_MENU_NOUVEAU = "1"
-PLAYER_MENU_AFFICHER = "2"
-PLAYER_MENU_QUIT = "0"
+LIST_CUSTOMERS = "1"
+LIST_DEALS = "2"
+LIST_EVENTS = "3"
+LOG_OUT = "0"
 
+# User Menu Manager
+
+LIST_MANAGER_ASSIGN_EVENT = "4"
+LIST_MANAGER_MANAGE_USER = "5"
+LIST_MANAGER_MANAGE_CONTRACT = "6"
+
+# User Menu Sales
+
+LIST_SALES_CREATE_NEW_CUSTOMER = "4"
+LIST_SALES_UPDATE_CUSTOMER = "5"
+LIST_SALES_UPDATE_CONTRACT = "6"
+LIST_SALES_CREATE_EVENT = "7"
 # Dossier et Nom fichier
 
 DATA_FOLDER = "data"
@@ -51,4 +64,3 @@ ERR_USER_NOT_FOUND = "USER not found"
 ERR_USER_NO_ROLE = (
     "This USER has no role, he cannot interact with the application"
 )
-ERR_CUSTOMER_NOT_FOUND = "Customer not found"
