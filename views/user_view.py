@@ -14,7 +14,7 @@ class UserView:
     def display_user_menu(self, role: models.UserRole):
         print(constantes.LOG_OUT, "- Logout")
         print(constantes.LIST_CUSTOMERS, "- List Customers")
-        print(constantes.LIST_DEALS, "- List Contracts")
+        print(constantes.LIST_CONTRACTS, "- List Contracts")
         print(constantes.LIST_EVENTS, "- List Events")
         match role:
             case models.UserRole.MANAGER:
@@ -43,10 +43,10 @@ class UserView:
         print(constantes.LIST_MANAGER_MANAGE_CONTRACT, "- Manage Contract")
 
     def input_user_management(self):
-        print("0 - Exit")
-        print("1 - Create a new user")
-        print("2 - Update a user")
-        print("3 - Delete a user")
+        print(constantes.LOG_OUT, " - Exit")
+        print(constantes.MANAGER_CREATE_NEW_USER, " - Create a new user")
+        print(constantes.MANAGER_UPDATE_USER, " - Update a user")
+        print(constantes.MANAGER_DELETE_USER, " - Delete a user")
         selection = -1
         while selection < 0 or selection > 3:
             try:
@@ -154,7 +154,7 @@ class UserView:
         )
         print(
             constantes.LIST_SALES_UPDATE_CONTRACT,
-            " - Update your Customer Deal",
+            " - Update your Customer Contract",
         )
         print(
             constantes.LIST_MANAGER_ASSIGN_EVENT,

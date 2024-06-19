@@ -46,8 +46,9 @@ class CustomerView:
             f"Phone : {customer.phone_number} \n"
             f"Email : {customer.email} \n"
             f"Compagny : {customer.compagny_name} \n"
-            f"Last contact date : "
-            f"{customer.last_contact_date} \n"
+            f"Contact : {customer.user.full_name} \n"
+            f"Creation date : {customer.creation_date} \n"
+            f"Last date contact: {customer.last_contact_date} \n"
             "--------------- \n"
         )
 
@@ -55,10 +56,14 @@ class CustomerView:
         print("--- Update Customer Management ---")
         first_name = self.input_first_name()
         last_name = self.input_last_name()
+        email = self.input_email()
         phone_number = self.input_phone_number()
+        compagny_name = self.input_compagny_name()
         return {
             "first_name": first_name,
             "last_name": last_name,
+            "compagny_name": compagny_name,
+            "email": email,
             "phone": phone_number,
         }
 

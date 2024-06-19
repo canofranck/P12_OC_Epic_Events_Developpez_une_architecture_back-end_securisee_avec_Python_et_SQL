@@ -46,11 +46,11 @@ class UserController:
         match selection:
             case 0:
                 return
-            case 1:
+            case constantes.MANAGER_CREATE_NEW_USER:
                 self.create_user()
-            case 2:
+            case constantes.MANAGER_UPDATE_USER:
                 self.update_user()
-            case 3:
+            case constantes.MANAGER_DELETE_USER:
                 self.delete_user()
             case _:
                 print("input invalide")
@@ -154,9 +154,6 @@ class UserController:
         if user is None:
             print("user NOTFOUND")
         return user
-
-    def manage_contract(self):
-        print("contract a faire")
 
     def is_password_correct(self, input_password, user):
         input_bytes = input_password.encode("utf-8")

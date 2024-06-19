@@ -26,8 +26,12 @@ class MainController:
             session, view=views.UserView()
         )
         self.customer_controller = controllers.CustomerController(
-            session=session, view=views.CustomerView()
+            session, view=views.CustomerView()
         )
+        self.contract_controller = controllers.ContractController(
+            session=session, view=views.ContractView()
+        )
+
         self.user = None
 
     def run(self):
@@ -79,9 +83,9 @@ class MainController:
 
     def set_user_to_controllers(self, user):
         self.user = user
-        # self.customer_controller.collaborator = collaborator
-        # self.deal_controller.collaborator = collaborator
-        # self.event_controller.collaborator = collaborator
+        self.customer_controller.user = user
+        self.contract_controller.user = user
+        # self.event_controller.user = user
 
     def get_user_main_menu(self):
         running = True
@@ -107,10 +111,10 @@ class MainController:
     def process_manager_action(self, menu_selection):
 
         match menu_selection:
-            case 1:
-                pass
-            case 2:
-                pass
+            case constantes.LIST_CUSTOMERS:
+                self.customer_controller.list_customers()
+            case constantes.LIST_CONTRACTS:
+                self.contract_controller.list_contracts()
             case 3:
                 pass
             case 4:
@@ -121,23 +125,24 @@ class MainController:
 
             case constantes.LIST_MANAGER_MANAGE_CONTRACT:
                 print("j ai fait choix 6")
-                self.user_controller.manage_contract()
+                self.manage_contract()
             case _:
                 print("input invalide")
 
     def process_sales_action(self, menu_selection):
         print("je suis dans le menu sales")
         match menu_selection:
-            case 1:
-                pass
-            case 2:
+            case constantes.LIST_CUSTOMERS:
+                self.customer_controller.list_customers()
+            case constantes.LIST_CONTRACTS:
+                self.contract_controller.list_contracts()
                 pass
             case 3:
                 pass
             case constantes.LIST_SALES_CREATE_NEW_CUSTOMER:
                 self.customer_controller.create_customer()
-            case 5:
-                pass
+            case constantes.LIST_SALES_UPDATE_CUSTOMER:
+                self.customer_controller.update_customer()
             case 6:
                 pass
             case 7:
@@ -147,3 +152,12 @@ class MainController:
 
     def process_support_action(self, choice):
         pass
+
+    def manage_contract(self):
+        try:
+            customer_to_manage = self.customer_controller.get_customer()
+            return self.contract_controller.manage_contracts(
+                customer_to_manage
+            )
+        except ValueError as err:
+            print("error", err)

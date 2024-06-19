@@ -12,16 +12,17 @@ class CustomerController:
         self.user = user
 
     def create_customer(self):
-        email = self.set_new_customer_email()
-        phone = self.set_customer_phone()
+        if self.user is None:
+            print("No user is currently logged in.")
+
         new_customer_input = self.view.input_customer_information()
         new_customer = models.Customer(
             first_name=new_customer_input["first_name"],
             last_name=new_customer_input["last_name"],
-            email=email,
-            phone_number=phone,
+            email=self.set_new_customer_email(),
+            phone_number=self.set_customer_phone(),
             compagny_name=new_customer_input["compagny_name"],
-            contact=self.user,
+            sales_id=self.user.id,
         )
         self.session.add(new_customer)
         try:
@@ -29,7 +30,7 @@ class CustomerController:
             return self.view.display_new_customer_validation()
         except Exception as err:
             self.session.rollback()
-            return self.view.display_error(err)
+            print("error", err)
 
     def set_new_customer_email(self):
         email = ""
@@ -41,7 +42,7 @@ class CustomerController:
                 email = email_input
                 continue
             except ValueError as err:
-                self.view.display_error(err)
+                print("error", err)
                 continue
         return email
 
@@ -64,3 +65,38 @@ class CustomerController:
                 print("error", err)
                 continue
         return phone
+
+    def update_customer(self):
+        try:
+            customer = self.get_customer(self.user)
+            self.view.display_customer_information(customer)
+
+            update_customer_input = self.view.input_customer_information()
+            customer.phone_number = self.set_customer_phone()
+            customer.first_name = update_customer_input["first_name"]
+            customer.last_name = update_customer_input["last_name"]
+            customer.compagny_name = update_customer_input["compagny_name"]
+            customer.last_contact_date = datetime.now()
+            self.session.commit()
+        except ValueError as err:
+            print("error", err)
+
+    def get_customer(self, user: models.User = None):
+        email = self.view.input_email()
+        filters = {"email": email}
+        if user is not None:
+            filters["sales_id"] = user.id
+
+        customer = (
+            self.session.query(models.Customer).filter_by(**filters).first()
+        )
+        if customer is None:
+            raise print("CUSTOMER_NOT_FOUND")
+        return customer
+
+    def list_customers(self):
+        customers = self.session.query(models.Customer).all()
+        if len(customers) == 0:
+            return print(" Customer not found")
+        for customer in customers:
+            self.view.display_customer_information(customer)
