@@ -6,8 +6,6 @@ import models.user
 # Programme principal
 if __name__ == "__main__":
     session = init_db()
-    if not database_exists():
-        create_database()
 
     main_controller = MainController(session)
     main_controller.create_admin()

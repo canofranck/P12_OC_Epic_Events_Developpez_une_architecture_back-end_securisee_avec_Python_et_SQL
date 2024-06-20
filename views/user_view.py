@@ -19,16 +19,15 @@ class UserView:
         match role:
             case models.UserRole.MANAGER:
                 self.display_management_menu()
-                pass
+
             case models.UserRole.SALES:
                 self.display_sales_menu()
-                pass
+
             case models.UserRole.SUPPORT:
-                # self.display_support_menu()
-                pass
+                self.display_support_menu()
+
             case models.UserRole.ADMIN:
-                # self.display_admin_menu()
-                pass
+                self.display_admin_menu()
 
         return input(
             " je suis dans display user menu Choisissez une option : "
@@ -48,14 +47,14 @@ class UserView:
         print(constantes.MANAGER_UPDATE_USER, " - Update a user")
         print(constantes.MANAGER_DELETE_USER, " - Delete a user")
         selection = -1
-        while selection < 0 or selection > 3:
-            try:
+        while selection not in [
+            constantes.MANAGER_CREATE_NEW_USER,
+            constantes.MANAGER_UPDATE_USER,
+            constantes.MANAGER_DELETE_USER,
+        ]:
 
-                selection = int(input("Select an action:"))
-                if selection > 3 or selection < 0:
-                    raise ValueError
-            except ValueError:
-                print("input invalide")
+            selection = input("Select an action:")
+
         return selection
 
     def display_new_user_panel(self):
@@ -157,6 +156,12 @@ class UserView:
             " - Update your Customer Contract",
         )
         print(
-            constantes.LIST_MANAGER_ASSIGN_EVENT,
+            constantes.LIST_SALES_CREATE_EVENT,
             " - Create an Event for a Customer",
         )
+
+    def display_support_menu(self):
+        print(constantes.LIST_SUPPORT_CREATE_EVENT, " - Manage your Events")
+
+    def display_admin_menu(self):
+        print(constantes.ADMIN_CREATE_NEW_USER, " - Create user")

@@ -31,6 +31,9 @@ class MainController:
         self.contract_controller = controllers.ContractController(
             session=session, view=views.ContractView()
         )
+        self.event_controller = controllers.EventController(
+            session=session, view=views.EventView()
+        )
 
         self.user = None
 
@@ -85,7 +88,7 @@ class MainController:
         self.user = user
         self.customer_controller.user = user
         self.contract_controller.user = user
-        # self.event_controller.user = user
+        self.event_controller.user = user
 
     def get_user_main_menu(self):
         running = True
@@ -117,12 +120,12 @@ class MainController:
                 self.contract_controller.list_contracts()
             case 3:
                 pass
-            case 4:
-                pass
+            case constantes.LIST_MANAGER_ASSIGN_EVENT:
+                self.set_support_on_event()
             case constantes.LIST_MANAGER_MANAGE_USER:
                 print("j ai fait choix 5")
                 self.user_controller.manage_user()
-
+                pass
             case constantes.LIST_MANAGER_MANAGE_CONTRACT:
                 print("j ai fait choix 6")
                 self.manage_contract()
@@ -143,15 +146,26 @@ class MainController:
                 self.customer_controller.create_customer()
             case constantes.LIST_SALES_UPDATE_CUSTOMER:
                 self.customer_controller.update_customer()
-            case 6:
-                pass
-            case 7:
-                pass
+            case constantes.LIST_SALES_UPDATE_CONTRACT:
+                self.update_customer_contract_sales()
+            case constantes.LIST_SALES_CREATE_EVENT:
+                self.create_event_sales()
+
             case _:
                 print("input invalide")
 
-    def process_support_action(self, choice):
-        pass
+    def process_support_action(self, menu_selection):
+        match menu_selection:
+            case 1:
+                self.customer_controller.list_customers()
+            case 2:
+                self.contract_controller.list_contracts()
+            case 3:
+                pass
+            case 4:
+                pass
+            case _:
+                print("input invalide")
 
     def manage_contract(self):
         try:
@@ -161,3 +175,39 @@ class MainController:
             )
         except ValueError as err:
             print("error", err)
+
+    def update_customer_contract_sales(self):
+        try:
+            customer_to_manage = self.customer_controller.get_customer(
+                self.user
+            )
+            self.contract_controller.update_contract(customer_to_manage)
+        except ValueError as err:
+            print("error", err)
+
+    def create_event_sales(self):
+        try:
+            customer_to_manage = self.customer_controller.get_customer(
+                self.user
+            )
+            contract_to_manage = self.contract_controller.get_contract(
+                customer_to_manage
+            )
+            return self.event_controller.create_event(
+                customer_to_manage, contract_to_manage
+            )
+        except ValueError as err:
+            print("error", err)
+
+    def set_support_on_event(self):
+        try:
+            support_user = self.user_controller.get_user()
+            if support_user.role != models.UserRole.SUPPORT:
+                return print("NOT SUPPORT USER")
+
+            return self.event_controller.update_event(
+                support_user=support_user,
+                assigned_support=None,
+            )
+        except ValueError as err:
+            return print("error", err)

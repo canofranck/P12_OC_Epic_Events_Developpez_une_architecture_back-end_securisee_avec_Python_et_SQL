@@ -9,7 +9,9 @@ class Event(Base):
     __tablename__ = "events"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     # Relation with Users:
-    support_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    support_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id"), nullable=True
+    )
     user: Mapped["User"] = relationship(back_populates="events")
 
     # relation with Contracts one to one :
@@ -29,8 +31,8 @@ class Event(Base):
 
     def __init__(
         self,
-        support_id,
-        contract_id,
+        # support_id,
+        # contract_id,
         event_name,
         customer_name,
         customer_contact,
@@ -39,6 +41,8 @@ class Event(Base):
         location,
         nb_attendees,
         notes,
+        user=None,
+        contract=None,
     ):
 
         self.name = event_name
@@ -49,8 +53,10 @@ class Event(Base):
         self.location = location
         self.attendees = nb_attendees
         self.notes = notes
-        self.support_id = support_id
-        self.contract_id = contract_id
+        self.user = user
+        self.contract = contract
+        # self.support_id = support_id
+        # self.contract_id = contract_id
 
     def __str__(self):
         return f"Event {self.id} - Name: {self.event_name} - Start: {self.start_date} - End: {self.end_date} - Location: {self.location} - Attendees: {self.nb_attendees}"

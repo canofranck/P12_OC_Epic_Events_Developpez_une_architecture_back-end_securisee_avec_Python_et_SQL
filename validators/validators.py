@@ -23,7 +23,7 @@ def validate_phone(phone):
     return phone
 
 
-def validate_period(start_date, end_date):
+def validate_date(start_date, end_date):
     if start_date > end_date:
         print("period not valid")
     return start_date, end_date

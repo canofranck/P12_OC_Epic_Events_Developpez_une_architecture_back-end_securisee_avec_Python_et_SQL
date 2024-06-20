@@ -39,14 +39,16 @@ class UserController:
                 return user
 
     def manage_user(self):
-        selection = self.view.input_user_management()
+        selection_menu = self.view.input_user_management()
         print(
-            "retour affichage de input user management selection=", selection
+            "retour affichage de input user management selection=",
+            selection_menu,
         )
-        match selection:
+        match selection_menu:
             case 0:
                 return
             case constantes.MANAGER_CREATE_NEW_USER:
+                print("choix 1 create user")
                 self.create_user()
             case constantes.MANAGER_UPDATE_USER:
                 self.update_user()
@@ -54,6 +56,7 @@ class UserController:
                 self.delete_user()
             case _:
                 print("input invalide")
+                self.create_user()
         return
 
     def create_user(self):
