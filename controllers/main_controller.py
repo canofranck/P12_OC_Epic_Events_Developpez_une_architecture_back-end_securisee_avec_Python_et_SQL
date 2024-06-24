@@ -19,11 +19,12 @@ import views
 class MainController:
     """Contrôleur principal de l'application."""
 
-    def __init__(self, session):
+    def __init__(self, session, salt):
         self.session = session
+        self.salt = salt
         self.view = views.MainView()
         self.user_controller = controllers.UserController(
-            session, view=views.UserView()
+            session, salt, view=views.UserView()
         )
         self.customer_controller = controllers.CustomerController(
             session, view=views.CustomerView()

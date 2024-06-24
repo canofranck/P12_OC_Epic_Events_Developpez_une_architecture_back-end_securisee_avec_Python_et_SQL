@@ -9,14 +9,15 @@ import validators
 # logging.basicConfig(level=logging.DEBUG)
 # logger = logging.getLogger(__name__)
 
-salt = b"$2b$12$QhTfGmCB1FrbuySv8Op4IO"
+# salt = b"$2b$12$QhTfGmCB1FrbuySv8Op4IO"
 
 
 class UserController:
     """Contrôleur pour la gestion des joueurs."""
 
-    def __init__(self, session, view, user=None):
+    def __init__(self, session, salt, view, user=None):
         self.session = session
+        self.salt = salt
         self.view = view
         self.user = user
 
@@ -160,7 +161,9 @@ class UserController:
 
     def is_password_correct(self, input_password, user):
         input_bytes = input_password.encode("utf-8")
-        hash_input_password = bcrypt.hashpw(input_bytes, salt)
+        hash_input_password = bcrypt.hashpw(
+            input_bytes, self.salt.encode("utf-8")
+        )
         # logger.debug(f"h input password: {input_bytes}")
         # logger.debug(f"Mot de passe bd: {user.password}")
         # logger.debug(f"Mot de passe user crypt : {hash_input_password}")

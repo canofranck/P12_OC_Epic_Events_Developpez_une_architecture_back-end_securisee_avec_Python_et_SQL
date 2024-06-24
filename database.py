@@ -8,17 +8,24 @@ from models.customers import Customer
 from models.contract import Contract
 from models.event import Event
 import logging
+from dotenv import load_dotenv
+import os
 
 # logging.basicConfig()
 # logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 
-config = configparser.ConfigParser()
-config.read("config.ini")
+# config = configparser.ConfigParser()
+# config.read("config.ini")
 
-DATABASE_USERNAME = config.get("database", "username")
-DATABASE_PASSWORD = config.get("database", "password")
-DATABASE_HOST = config.get("database", "host")
-DATABASE_NAME = config.get("database", "database_name")
+# DATABASE_USERNAME = config.get("database", "username")
+# DATABASE_PASSWORD = config.get("database", "password")
+# DATABASE_HOST = config.get("database", "host")
+# DATABASE_NAME = config.get("database", "database_name")
+# Récupérer les valeurs des variables d'environnement
+DATABASE_USERNAME = os.getenv("username")
+DATABASE_PASSWORD = os.getenv("password")
+DATABASE_HOST = os.getenv("host")
+DATABASE_NAME = os.getenv("database_name")
 
 DATABASE_URL = f"mysql+mysqlconnector://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@{DATABASE_HOST}/{DATABASE_NAME}"
 

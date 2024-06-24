@@ -1,5 +1,5 @@
 import models
-
+import getpass
 import views
 import constantes
 
@@ -72,7 +72,7 @@ class UserView:
 
     def input_password(self):
 
-        return input("password : ")
+        return getpass.getpass("password : ")
 
     def input_user_role(self):
         print(f"1 - {models.UserRole.MANAGER}")

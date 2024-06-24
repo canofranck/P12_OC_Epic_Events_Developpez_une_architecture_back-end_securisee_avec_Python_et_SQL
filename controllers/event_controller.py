@@ -1,4 +1,4 @@
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 import models
 import views
 from datetime import datetime
@@ -113,11 +113,22 @@ class EventController:
         event_filters_input = self.view.input_list_events_filters()
         filters = []
         if event_filters_input == 1:
+            # Filtrer les événements que l'utilisateur gère
             filters.append(models.Event.user == self.user)
-        if event_filters_input == 2:
-            filters.append(models.Event.user is None)
-        events = (
-            self.session.query(models.Event).filter(and_(True, *filters)).all()
-        )
+        elif event_filters_input == 2:
+            # Filtrer les événements sans support
+            filters.append(models.Event.user == None)
+        elif event_filters_input == 3:
+            # Filtrer les événements que l'utilisateur gère et les événements sans support
+            filters.append(
+                or_(models.Event.user == self.user, models.Event.user == None)
+            )
+
+        if filters:
+            events = self.session.query(models.Event).filter(*filters).all()
+        else:
+            # Si aucun filtre n'est sélectionné, afficher tous les événements
+            events = self.session.query(models.Event).all()
+
         for event in events:
             self.view.display_event(event)
