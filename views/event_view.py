@@ -7,13 +7,13 @@ class EventView:
 
     def display_event(self, event: models.Event):
         print(
-            f"Event Name       : {event.name} \n"
+            f"Event Name       : {event.event_name} \n"
             f"Customer Name    : {event.customer_name} \n"
             f"Customer Contact : {event.customer_contact} \n"
             f"Start Date       : {event.start_date} \n"
             f"End Date         : {event.end_date} \n"
             f"Location         : {event.location} \n"
-            f"Number attendees : {event.attendees} \n"
+            f"Number attendees : {event.nb_attendees} \n"
             f"Notes            : {event.notes} \n"
         )
         if event.user is not None:
@@ -44,18 +44,19 @@ class EventView:
 
     def input_event_nb_attendees(self):
 
-        attendees = 0
-        while attendees == 0:
+        nb_attendees = 0
+        while nb_attendees == 0:
             try:
-                attendees = int(input("Event attendees : "))
-                if attendees < 0:
-                    attendees = 0
+                nb_attendees = int(input("Event attendees : "))
+                if nb_attendees < 0:
+                    nb_attendees = 0
                     print("ENTER A POSITIVE VALUE")
                     continue
             except ValueError:
                 print("ENTER A ENTIRE VALUE")
                 continue
-        return attendees
+
+        return nb_attendees
 
     def input_event_notes(self):
 
@@ -103,3 +104,27 @@ class EventView:
 
     def display_update_event_validation(self):
         return print("Event correctly updated")
+
+    def input_list_events_filters(self):
+        print("-- List Events Filters --")
+        print(constantes.EVENT_FILTER_NO_FILTER, "- No filters")
+        print(
+            constantes.EVENT_FILTER_ONLY_YOURS, "- Only the events you manage"
+        )
+        print(
+            constantes.EVENT_FILTER_NO_SUPPORT,
+            "- Display events that have no support",
+        )
+        list_event_filter = ""
+        while list_event_filter == "":
+            try:
+                list_event_filter = int(input())
+                if list_event_filter < 1 or list_event_filter > 3:
+                    list_event_filter = ""
+                    print("error MENU INPUT")
+                    continue
+                continue
+            except ValueError:
+                print("error  ERR NOT DIGIT VALUE")
+                continue
+        return list_event_filter

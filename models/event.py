@@ -45,13 +45,13 @@ class Event(Base):
         contract=None,
     ):
 
-        self.name = event_name
+        self.event_name = event_name
         self.customer_name = customer_name
         self.customer_contact = customer_contact
         self.start_date = start_date
         self.end_date = end_date
         self.location = location
-        self.attendees = nb_attendees
+        self.nb_attendees = nb_attendees
         self.notes = notes
         self.user = user
         self.contract = contract

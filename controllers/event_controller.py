@@ -1,3 +1,4 @@
+from sqlalchemy import and_
 import models
 import views
 from datetime import datetime
@@ -13,6 +14,11 @@ class EventController:
     def create_event(
         self, customer: models.Customer, contract: models.Contract
     ):
+        # Vérifier si le contrat est signé
+        if not contract.is_signed:
+            return print(
+                "The contract hasn't been signed, so it's impossible to create an event."
+            )
         self.view.display_new_event_panel()
         start_date, end_date = self.set_new_event()
 
@@ -27,6 +33,7 @@ class EventController:
             notes=self.view.input_event_notes(),
             contract=contract,
         )
+
         try:
             self.session.add(new_event)
             self.session.commit()
@@ -101,3 +108,16 @@ class EventController:
         if event is None:
             raise print("EVENT_NOT_FOUND")
         return event
+
+    def list_events(self):
+        event_filters_input = self.view.input_list_events_filters()
+        filters = []
+        if event_filters_input == 1:
+            filters.append(models.Event.user == self.user)
+        if event_filters_input == 2:
+            filters.append(models.Event.user is None)
+        events = (
+            self.session.query(models.Event).filter(and_(True, *filters)).all()
+        )
+        for event in events:
+            self.view.display_event(event)

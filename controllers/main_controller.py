@@ -118,8 +118,8 @@ class MainController:
                 self.customer_controller.list_customers()
             case constantes.LIST_CONTRACTS:
                 self.contract_controller.list_contracts()
-            case 3:
-                pass
+            case constantes.LIST_EVENTS:
+                self.event_controller.list_events()
             case constantes.LIST_MANAGER_ASSIGN_EVENT:
                 self.set_support_on_event()
             case constantes.LIST_MANAGER_MANAGE_USER:
@@ -139,9 +139,8 @@ class MainController:
                 self.customer_controller.list_customers()
             case constantes.LIST_CONTRACTS:
                 self.contract_controller.list_contracts()
-                pass
-            case 3:
-                pass
+            case constantes.LIST_EVENTS:
+                self.event_controller.list_events()
             case constantes.LIST_SALES_CREATE_NEW_CUSTOMER:
                 self.customer_controller.create_customer()
             case constantes.LIST_SALES_UPDATE_CUSTOMER:
@@ -160,8 +159,8 @@ class MainController:
                 self.customer_controller.list_customers()
             case 2:
                 self.contract_controller.list_contracts()
-            case 3:
-                pass
+            case constantes.LIST_EVENTS:
+                self.event_controller.list_events()
             case 4:
                 pass
             case _:
