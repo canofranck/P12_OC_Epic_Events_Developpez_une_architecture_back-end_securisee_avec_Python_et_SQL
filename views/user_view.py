@@ -165,3 +165,6 @@ class UserView:
 
     def display_admin_menu(self):
         print(constantes.ADMIN_CREATE_NEW_USER, " - Create user")
+
+    def display_support_on_event(self):
+        print("Enter Email support to assign : ")

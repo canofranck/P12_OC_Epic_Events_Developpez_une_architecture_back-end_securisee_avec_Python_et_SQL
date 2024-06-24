@@ -19,12 +19,13 @@ import views
 class MainController:
     """Contrôleur principal de l'application."""
 
-    def __init__(self, session, salt):
+    def __init__(self, session, salt, secret_key):
         self.session = session
         self.salt = salt
+        self.secret_key = secret_key
         self.view = views.MainView()
         self.user_controller = controllers.UserController(
-            session, salt, view=views.UserView()
+            session, salt, secret_key, view=views.UserView()
         )
         self.customer_controller = controllers.CustomerController(
             session, view=views.CustomerView()
@@ -124,11 +125,8 @@ class MainController:
             case constantes.LIST_MANAGER_ASSIGN_EVENT:
                 self.set_support_on_event()
             case constantes.LIST_MANAGER_MANAGE_USER:
-                print("j ai fait choix 5")
                 self.user_controller.manage_user()
-                pass
             case constantes.LIST_MANAGER_MANAGE_CONTRACT:
-                print("j ai fait choix 6")
                 self.manage_contract()
             case _:
                 print("input invalide")
@@ -156,14 +154,17 @@ class MainController:
 
     def process_support_action(self, menu_selection):
         match menu_selection:
-            case 1:
+            case constantes.LIST_CUSTOMERS:
                 self.customer_controller.list_customers()
-            case 2:
+            case constantes.LIST_CONTRACTS:
                 self.contract_controller.list_contracts()
             case constantes.LIST_EVENTS:
                 self.event_controller.list_events()
-            case 4:
-                pass
+            case constantes.SUPPORT_MANAGE_EVENT:
+                self.event_controller.update_event(
+                    support_user=None,
+                    assigned_support=self.user,
+                )
             case _:
                 print("input invalide")
 
@@ -201,6 +202,7 @@ class MainController:
 
     def set_support_on_event(self):
         try:
+            self.user_controller.view.display_support_on_event()
             support_user = self.user_controller.get_user()
             if support_user.role != models.UserRole.SUPPORT:
                 return print("NOT SUPPORT USER")

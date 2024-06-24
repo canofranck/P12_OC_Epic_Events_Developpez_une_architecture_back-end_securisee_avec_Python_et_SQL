@@ -1,13 +1,14 @@
 import models
 import bcrypt
-
-
 import constantes
 import logging
 import validators
+import jwt
+import os
+from datetime import datetime, timedelta
 
-# logging.basicConfig(level=logging.DEBUG)
-# logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # salt = b"$2b$12$QhTfGmCB1FrbuySv8Op4IO"
 
@@ -15,29 +16,33 @@ import validators
 class UserController:
     """Contrôleur pour la gestion des joueurs."""
 
-    def __init__(self, session, salt, view, user=None):
+    def __init__(self, session, salt, secret_key, view, user=None):
         self.session = session
         self.salt = salt
+        self.secret_key = secret_key
         self.view = view
         self.user = user
 
     def run_login_menu(self):
-        while True:
-            email = self.view.input_email()
+        email = self.view.input_email()
+        token = self.load_token(email)
+        if token and self.is_token_valid(token):
+            self.user = self.get_user_from_token(token)
+            return self.user
 
-            user = (
-                self.session.query(models.User).filter_by(email=email).first()
-            )
-            if user is None:
-                print(constantes.ERR_USER_NOT_FOUND)
+        user = self.session.query(models.User).filter_by(email=email).first()
+        if user is None:
+            print(constantes.ERR_USER_NOT_FOUND)
+            return
+
+        while True:
+            password = self.view.input_password()
+            if not self.is_password_correct(password, user):
+                print("Bad password. Please try again.")
                 continue
-            while True:
-                password = self.view.input_password()
-                if not self.is_password_correct(password, user):
-                    print("Bad password. Please try again.")
-                    continue
-                self.user = user
-                return user
+            self.user = user
+            self.save_token(self.generate_token(user), email)
+            return user
 
     def manage_user(self):
         selection_menu = self.view.input_user_management()
@@ -160,14 +165,55 @@ class UserController:
         return user
 
     def is_password_correct(self, input_password, user):
+        print("salt : ", self.salt)
         input_bytes = input_password.encode("utf-8")
         hash_input_password = bcrypt.hashpw(
             input_bytes, self.salt.encode("utf-8")
         )
-        # logger.debug(f"h input password: {input_bytes}")
-        # logger.debug(f"Mot de passe bd: {user.password}")
-        # logger.debug(f"Mot de passe user crypt : {hash_input_password}")
+        logger.debug(f"h input password: {input_bytes}")
+        logger.debug(f"Mot de passe bd: {user.password}")
+        logger.debug(f"Mot de passe user crypt : {hash_input_password}")
         is_correct = hash_input_password == user.password.encode("utf-8")
 
         # logger.debug(f"Le mot de passe saisi est correct: {is_correct}")
         return is_correct
+
+    def generate_token(self, user):
+        payload = {
+            "user_id": user.id,
+            "exp": datetime.utcnow()
+            + timedelta(hours=1),  # Token valide pour 1 heure
+        }
+        return jwt.encode(payload, self.secret_key, algorithm="HS256")
+
+    def save_token(self, token, email):
+        filename = f"token_{email}.txt"
+        with open(filename, "w") as file:
+            file.write(token)
+
+    def load_token(self, email):
+        filename = f"token_{email}.txt"
+        if os.path.exists(filename):
+            with open(filename, "r") as file:
+                return file.read()
+        return None
+
+    def is_token_valid(self, token):
+        try:
+            jwt.decode(token, self.secret_key, algorithms=["HS256"])
+            return True
+        except jwt.ExpiredSignatureError:
+            print("Token expiré")
+        except jwt.InvalidTokenError:
+            print("Token invalide")
+        return False
+
+    def get_user_from_token(self, token):
+        try:
+            payload = jwt.decode(token, self.secret_key, algorithms=["HS256"])
+            user_id = payload["user_id"]
+            return (
+                self.session.query(models.User).filter_by(id=user_id).first()
+            )
+        except jwt.InvalidTokenError:
+            return None

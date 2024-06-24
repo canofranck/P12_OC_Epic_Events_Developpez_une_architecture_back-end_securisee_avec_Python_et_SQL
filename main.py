@@ -13,14 +13,16 @@ if __name__ == "__main__":
     host = os.getenv("host")
     database_name = os.getenv("database_name")
     salt = os.getenv("salt")
+    secret_key = os.getenv("secret_key")
     # Vérifiez si le sel est correctement chargé
     if not salt or not salt.startswith("$2b$"):
         raise ValueError(
             "Le sel est invalide ou manquant dans le fichier .env"
         )
+    print("salt : ", salt)
     session = init_db()
 
-    main_controller = MainController(session, salt)
+    main_controller = MainController(session, salt, secret_key)
     main_controller.create_admin()
 
     main_controller.run()

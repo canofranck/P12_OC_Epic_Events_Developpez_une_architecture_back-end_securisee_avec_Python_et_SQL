@@ -4,6 +4,6 @@
 /ENV/
 .env
 __pycache__/
-
+token_*
 
 
