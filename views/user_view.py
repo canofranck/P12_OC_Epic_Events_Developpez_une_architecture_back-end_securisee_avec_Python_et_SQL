@@ -2,36 +2,35 @@ import models
 import getpass
 import views
 import constantes
+from views.base_view import BaseView
 
 
-class UserView:
+class UserView(BaseView):
     def input_email(self):
         return input("Entrez votre email : ")
 
     def input_password(self):
         return input("Entrez votre mot de passe : ")
 
-    def display_user_menu(self, role: models.UserRole):
+    def display_user_menu(self, role_name):
+        print(f" --- Menu {role_name} --- ")
         print(constantes.LOG_OUT, "- Logout")
         print(constantes.LIST_CUSTOMERS, "- List Customers")
         print(constantes.LIST_CONTRACTS, "- List Contracts")
         print(constantes.LIST_EVENTS, "- List Events")
-        match role:
-            case models.UserRole.MANAGER:
+        match role_name:
+            case constantes.ROLE_MANAGER:
                 self.display_management_menu()
-
-            case models.UserRole.SALES:
+            case constantes.ROLE_SALES:
                 self.display_sales_menu()
-
-            case models.UserRole.SUPPORT:
+            case constantes.ROLE_SUPPORT:
                 self.display_support_menu()
-
-            case models.UserRole.ADMIN:
+            case constantes.ROLE_ADMIN:
                 self.display_admin_menu()
+            case _:
+                print("Rôle non reconnu")
 
-        return input(
-            " je suis dans display user menu Choisissez une option : "
-        )
+        return input("Choisissez une option : ")
 
     def display_management_menu(self):
         print(
@@ -42,6 +41,7 @@ class UserView:
         print(constantes.LIST_MANAGER_MANAGE_CONTRACT, "- Manage Contract")
 
     def input_user_management(self):
+        print("--- MANAGE USERS MENU --- \n")
         print(constantes.LOG_OUT, " - Exit")
         print(constantes.MANAGER_CREATE_NEW_USER, " - Create a new user")
         print(constantes.MANAGER_UPDATE_USER, " - Update a user")
@@ -75,9 +75,9 @@ class UserView:
         return getpass.getpass("password : ")
 
     def input_user_role(self):
-        print(f"1 - {models.UserRole.MANAGER}")
-        print(f"2 - {models.UserRole.SALES}")
-        print(f"3 - {models.UserRole.SUPPORT}")
+        print(f"1 - {constantes.ROLE_MANAGER}")
+        print(f"2 - {constantes.ROLE_SALES}")
+        print(f"3 - {constantes.ROLE_SUPPORT}")
 
         role_selection = 0
         while role_selection <= 0 or role_selection > 3:
@@ -90,13 +90,7 @@ class UserView:
                     raise ValueError
             except ValueError:
                 print("input invalid")
-        match role_selection:
-            case 1:
-                return models.UserRole.MANAGER
-            case 2:
-                return models.UserRole.SALES
-            case _:
-                return models.UserRole.SUPPORT
+        return role_selection
 
     def input_username(self):
 
@@ -108,6 +102,7 @@ class UserView:
 
     def display_new_user_validation(self):
         print("New user correctly created")
+        self.wait_for_key_press()
 
     def input_phone_number(self):
 
@@ -119,17 +114,18 @@ class UserView:
         full_name = self.input_full_name()
         email = self.input_email()
         phone_number = self.input_phone_number()
-        role = self.input_user_role()
+        role_id = self.input_user_role()
         return {
             "username": username,
             "full_name": full_name,
             "email": email,
             "phone_number": phone_number,
-            "role": role,
+            "role_id": role_id,
         }
 
     def display_update_user_validation(self):
         print("User successfully updated")
+        self.wait_for_key_press()
 
     def display_user_information(self, user):
 
@@ -137,10 +133,11 @@ class UserView:
         print(f"Fullname : {user.full_name} \n")
         print(f"Email : {user.email} \n")
         print(f"Phone number : {user.phone_number} \n")
-        print(f"Role : {user.role} \n")
+        print(f"Role : {user.role.name} \n")
 
     def display_delete_user_validation(self):
         print("User successfully deleted")
+        self.wait_for_key_press()
 
     def display_sales_menu(self):
         print(
@@ -168,3 +165,12 @@ class UserView:
 
     def display_support_on_event(self):
         print("Enter Email support to assign : ")
+
+    def login_menu(self):
+        print("--- Login Menu ---")
+
+    def display_update_user(self):
+        print("---UPDATE USERS MENU ---")
+
+    def display_delete_user(self):
+        print("---DELETE USER MENU ---")

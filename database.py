@@ -3,7 +3,8 @@ from sqlalchemy.orm import sessionmaker, registry
 import configparser
 import mysql.connector
 from models.base import Base
-from models.user import User, UserRole
+from models.role import Role
+from models.user import User
 from models.customers import Customer
 from models.contract import Contract
 from models.event import Event
@@ -11,17 +12,6 @@ import logging
 from dotenv import load_dotenv
 import os
 
-# logging.basicConfig()
-# logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
-
-# config = configparser.ConfigParser()
-# config.read("config.ini")
-
-# DATABASE_USERNAME = config.get("database", "username")
-# DATABASE_PASSWORD = config.get("database", "password")
-# DATABASE_HOST = config.get("database", "host")
-# DATABASE_NAME = config.get("database", "database_name")
-# Récupérer les valeurs des variables d'environnement
 DATABASE_USERNAME = os.getenv("username")
 DATABASE_PASSWORD = os.getenv("password")
 DATABASE_HOST = os.getenv("host")
@@ -31,7 +21,7 @@ DATABASE_URL = f"mysql+mysqlconnector://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@
 
 
 def database_exists():
-    connection = None  # Définir la variable connection en dehors du bloc try
+    connection = None
     try:
         connection = mysql.connector.connect(
             host=DATABASE_HOST,
@@ -52,7 +42,7 @@ def database_exists():
 
 
 def create_database():
-    connection = None  # Définir la variable connection en dehors du bloc try
+    connection = None
     try:
         connection = mysql.connector.connect(
             host=DATABASE_HOST,
@@ -76,4 +66,22 @@ def init_db():
     engine = create_engine(DATABASE_URL)
     Base.metadata.create_all(bind=engine)
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    # Initialiser les rôles par défaut après avoir créé les tables
+    session = SessionLocal()
+    roles = ["MANAGER", "SALES", "SUPPORT", "ADMIN"]
+    for role_name in roles:
+        existing_role = session.query(Role).filter_by(name=role_name).first()
+        if not existing_role:
+            role = Role(name=role_name)
+            session.add(role)
+
+    try:
+        session.commit()
+        print("Rôles ajoutés avec succès à la base de données.")
+    except Exception as e:
+        session.rollback()
+        print(f"Erreur lors de l'ajout des rôles : {e}")
+    finally:
+        session.close()
+
     return SessionLocal()

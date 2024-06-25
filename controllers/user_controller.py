@@ -6,11 +6,10 @@ import validators
 import jwt
 import os
 from datetime import datetime, timedelta
+from views.main_view import MainView
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
-# salt = b"$2b$12$QhTfGmCB1FrbuySv8Op4IO"
+# logging.basicConfig(level=logging.DEBUG)
+# logger = logging.getLogger(__name__)
 
 
 class UserController:
@@ -24,6 +23,8 @@ class UserController:
         self.user = user
 
     def run_login_menu(self):
+        MainView.clear_screen(self)
+        self.view.login_menu()
         email = self.view.input_email()
         token = self.load_token(email)
         if token and self.is_token_valid(token):
@@ -46,19 +47,18 @@ class UserController:
 
     def manage_user(self):
         selection_menu = self.view.input_user_management()
-        print(
-            "retour affichage de input user management selection=",
-            selection_menu,
-        )
+
         match selection_menu:
             case 0:
                 return
             case constantes.MANAGER_CREATE_NEW_USER:
-                print("choix 1 create user")
+                MainView.clear_screen(self)
                 self.create_user()
             case constantes.MANAGER_UPDATE_USER:
+                MainView.clear_screen(self)
                 self.update_user()
             case constantes.MANAGER_DELETE_USER:
+                MainView.clear_screen(self)
                 self.delete_user()
             case _:
                 print("input invalide")
@@ -70,7 +70,7 @@ class UserController:
         new_user = models.User(
             email=self.set_new_user_email(),
             password=self.set_new_user_password(),
-            role=self.view.input_user_role(),
+            role_id=self.view.input_user_role(),
             username=self.view.input_username(),
             full_name=self.view.input_full_name(),
             phone_number=self.set_user_phone(),
@@ -118,19 +118,18 @@ class UserController:
         return password
 
     def set_user_phone(self):
-        phone = ""
-        while phone == "":
+
+        while True:
             try:
                 phone_input = self.view.input_phone_number()
                 validators.validate_phone(phone_input)
-                phone = phone_input
-                continue
+                return phone_input
+
             except ValueError as err:
                 print("error", err)
-                continue
-        return phone
 
     def update_user(self):
+        self.view.display_update_user()
         try:
             user = self.get_user()
             self.view.display_user_information(user)
@@ -140,13 +139,14 @@ class UserController:
             user.full_name = update_user_input["full_name"]
             user.email = update_user_input["email"]
             user.phone_number = update_user_input["phone_number"]
-            user.role = update_user_input["role"]
+            user.role_id = update_user_input["role_id"]
             self.session.commit()
             return self.view.display_update_user_validation()
         except ValueError as err:
             print("error", err)
 
     def delete_user(self):
+        self.view.display_delete_user()
         try:
             user = self.get_user()
             self.session.delete(user)
@@ -165,14 +165,14 @@ class UserController:
         return user
 
     def is_password_correct(self, input_password, user):
-        print("salt : ", self.salt)
+        # print("salt : ", self.salt)
         input_bytes = input_password.encode("utf-8")
         hash_input_password = bcrypt.hashpw(
             input_bytes, self.salt.encode("utf-8")
         )
-        logger.debug(f"h input password: {input_bytes}")
-        logger.debug(f"Mot de passe bd: {user.password}")
-        logger.debug(f"Mot de passe user crypt : {hash_input_password}")
+        # logger.debug(f"h input password: {input_bytes}")
+        # logger.debug(f"Mot de passe bd: {user.password}")
+        # logger.debug(f"Mot de passe user crypt : {hash_input_password}")
         is_correct = hash_input_password == user.password.encode("utf-8")
 
         # logger.debug(f"Le mot de passe saisi est correct: {is_correct}")

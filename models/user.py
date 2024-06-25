@@ -2,7 +2,16 @@ from typing import List
 import uuid
 import bcrypt
 from sqlalchemy.orm import relationship, declarative_base
-from sqlalchemy import CHAR, VARCHAR, Column, Integer, String, UUID, Enum
+from sqlalchemy import (
+    CHAR,
+    VARCHAR,
+    Column,
+    ForeignKey,
+    Integer,
+    String,
+    UUID,
+    Enum,
+)
 import enum
 
 
@@ -22,14 +31,14 @@ class UserPermission:
     pass
 
 
-class UserRole(enum.Enum):
-    MANAGER = 1
-    SALES = 2
-    SUPPORT = 3
-    ADMIN = 4
+# class UserRole(enum.Enum):
+#     MANAGER = 1
+#     SALES = 2
+#     SUPPORT = 3
+#     ADMIN = 4
 
-    def __str__(self):
-        return self.name
+#     def __str__(self):
+#         return self.name
 
 
 class User(Base):
@@ -42,7 +51,10 @@ class User(Base):
     full_name = Column(String(100), nullable=False)
     email = Column(String(60), unique=True, nullable=False)
     phone_number = Column(String(20), nullable=False)
-    role = Column(Enum(UserRole), nullable=False)
+    role_id: Mapped[int] = mapped_column(
+        ForeignKey("roles.id"), nullable=False
+    )
+    role: Mapped["Role"] = relationship("Role", back_populates="users")
 
     contracts: Mapped[List["Contract"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
@@ -61,7 +73,7 @@ class User(Base):
         full_name,
         email,
         phone_number,
-        role,
+        role_id,
         password=None,
     ):
         if password:
@@ -69,7 +81,7 @@ class User(Base):
 
         self.username = username
         self.full_name = full_name
-        self.role = role
+        self.role_id = role_id
         self.email = email
         self.phone_number = phone_number
 

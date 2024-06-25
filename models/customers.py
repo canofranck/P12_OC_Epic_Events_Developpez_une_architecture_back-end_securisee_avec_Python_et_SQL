@@ -33,7 +33,7 @@ class Customer(Base):
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
     email = Column(String(50), unique=True, index=True)
-    phone_number = Column(String(20), unique=True, index=True)
+    phone_number = Column(String(20), unique=False, index=True)
     compagny_name = Column(String(100), unique=False, index=True)
     creation_date = Column(DateTime, default=datetime.now)
     last_contact_date = Column(DateTime, default=datetime.now)

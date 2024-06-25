@@ -1,8 +1,9 @@
 import models
-import views
+
+from views.base_view import BaseView
 
 
-class CustomerView:
+class CustomerView(BaseView):
 
     def input_first_name(self):
 
@@ -25,7 +26,7 @@ class CustomerView:
         return input("Compagny name : ")
 
     def input_customer_information(self):
-        print("---Customer Management ---")
+        print("--- Customer Management ---")
         fist_name = self.input_first_name()
         last_name = self.input_last_name()
         compagny_name = self.input_compagny_name()
@@ -38,6 +39,7 @@ class CustomerView:
 
     def display_new_customer_validation(self):
         print("New customer correctly created")
+        self.wait_for_key_press()
 
     def display_customer_information(self, customer: models.Customer):
         return print(
@@ -69,3 +71,4 @@ class CustomerView:
 
     def display_update_customer_validation(self):
         print("Customer successfully updated", style="success")
+        self.wait_for_key_press()

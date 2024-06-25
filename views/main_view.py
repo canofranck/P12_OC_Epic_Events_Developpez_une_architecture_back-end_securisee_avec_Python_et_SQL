@@ -11,7 +11,8 @@ class MainView:
         Returns:
             str: Le choix de l'utilisateur.
         """
-        print("\nWelcome to Epic Events CRM")
+
+        print("--- Welcome to Epic Events CRM ---")
         print("\nMenu :")
         print(constantes.MAIN_MENU_LOGIN, "Login")
         print(constantes.MAIN_MENU_QUIT, "Quitter")
@@ -23,7 +24,7 @@ class MainView:
         """
         print("Option invalide. Veuillez choisir une option valide.")
 
-    def clear_screen():
+    def clear_screen(self):
         """Clear the terminal"""
         # for windows
 
