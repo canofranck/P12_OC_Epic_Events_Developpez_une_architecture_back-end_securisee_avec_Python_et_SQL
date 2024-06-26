@@ -12,6 +12,10 @@ class ContractController:
         self.user = user
 
     def manage_contracts(self, customer: models.Customer):
+        contract_to_manage = self.get_contract(customer)
+        if contract_to_manage is not None:
+            self.view.display_contract_informations(contract_to_manage)
+
         menu_selection = self.view.input_contract_management()
         match menu_selection:
             case 0:
@@ -79,7 +83,7 @@ class ContractController:
             .first()
         )
         if contract is None:
-            print("CONTRACT NOT FOUND")
+            self.view.display_no_contract_found()
         return contract
 
     def list_contracts(self):

@@ -8,7 +8,8 @@ from models.user import User
 from models.customers import Customer
 from models.contract import Contract
 from models.event import Event
-import logging
+
+# import logging
 from dotenv import load_dotenv
 import os
 

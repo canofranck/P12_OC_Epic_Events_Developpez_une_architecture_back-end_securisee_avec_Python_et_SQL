@@ -1,9 +1,10 @@
 from controllers.main_controller import MainController
-from database import init_db, database_exists, create_database
+from database import init_db
 import models
 import models.user
 from dotenv import load_dotenv
 import os
+import themes
 
 # Programme principal
 if __name__ == "__main__":
@@ -19,10 +20,12 @@ if __name__ == "__main__":
         raise ValueError(
             "Le sel est invalide ou manquant dans le fichier .env"
         )
-    print("salt : ", salt)
+
     session = init_db()
 
-    main_controller = MainController(session, salt, secret_key)
+    main_controller = MainController(
+        session, salt, secret_key, console=themes.theme_console()
+    )
     main_controller.create_admin()
 
     main_controller.run()

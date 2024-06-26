@@ -1,12 +1,14 @@
 import models
 import bcrypt
 import constantes
-import logging
+
+# import logging
 import validators
 import jwt
 import os
 from datetime import datetime, timedelta
-from views.main_view import MainView
+
+import views
 
 # logging.basicConfig(level=logging.DEBUG)
 # logger = logging.getLogger(__name__)
@@ -23,7 +25,7 @@ class UserController:
         self.user = user
 
     def run_login_menu(self):
-        MainView.clear_screen(self)
+        views.MainView.clear_screen(self)
         self.view.login_menu()
         email = self.view.input_email()
         token = self.load_token(email)
@@ -52,13 +54,13 @@ class UserController:
             case 0:
                 return
             case constantes.MANAGER_CREATE_NEW_USER:
-                MainView.clear_screen(self)
+                views.MainView.clear_screen(self)
                 self.create_user()
             case constantes.MANAGER_UPDATE_USER:
-                MainView.clear_screen(self)
+                views.MainView.clear_screen(self)
                 self.update_user()
             case constantes.MANAGER_DELETE_USER:
-                MainView.clear_screen(self)
+                views.MainView.clear_screen(self)
                 self.delete_user()
             case _:
                 print("input invalide")
@@ -203,9 +205,9 @@ class UserController:
             jwt.decode(token, self.secret_key, algorithms=["HS256"])
             return True
         except jwt.ExpiredSignatureError:
-            print("Token expiré")
+            self.view.display_token_expire()
         except jwt.InvalidTokenError:
-            print("Token invalide")
+            self.view.display_token_invalide()
         return False
 
     def get_user_from_token(self, token):

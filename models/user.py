@@ -1,3 +1,4 @@
+import os
 from typing import List
 import uuid
 import bcrypt
@@ -24,11 +25,11 @@ import logging
 # logging.basicConfig(level=logging.DEBUG)
 # logger = logging.getLogger(__name__)
 
-salt = b"$2b$12$QhTfGmCB1FrbuySv8Op4IO"
+# salt = b"$2b$12$QhTfGmCB1FrbuySv8Op4IO"
 
-
-class UserPermission:
-    pass
+salt = os.getenv("salt")
+# class UserPermission:
+#     pass
 
 
 # class UserRole(enum.Enum):
@@ -95,5 +96,5 @@ class User(Base):
 
     def set_password(self, password: str) -> None:
         bytes = password.encode("utf-8")
-        hash_password = bcrypt.hashpw(bytes, salt)
+        hash_password = bcrypt.hashpw(bytes, salt.encode("utf-8"))
         self.password = hash_password.decode("utf-8")

@@ -6,7 +6,8 @@
 # from controllers.report_controller import ReportController
 # from controllers.tournament_controller import TournamentController
 import constantes
-import logging
+
+# import logging
 import models
 import controllers
 import views
@@ -19,22 +20,22 @@ import views
 class MainController:
     """Contrôleur principal de l'application."""
 
-    def __init__(self, session, salt, secret_key):
+    def __init__(self, session, salt, secret_key, console):
         self.session = session
         self.salt = salt
         self.secret_key = secret_key
-        self.view = views.MainView()
+        self.view = views.MainView(console)
         self.user_controller = controllers.UserController(
-            session, salt, secret_key, view=views.UserView()
+            session, salt, secret_key, view=views.UserView(console)
         )
         self.customer_controller = controllers.CustomerController(
-            session, view=views.CustomerView()
+            session, view=views.CustomerView(console)
         )
         self.contract_controller = controllers.ContractController(
-            session=session, view=views.ContractView()
+            session=session, view=views.ContractView(console)
         )
         self.event_controller = controllers.EventController(
-            session=session, view=views.EventView()
+            session=session, view=views.EventView(console)
         )
 
         self.user = None
@@ -52,9 +53,9 @@ class MainController:
         Raises:
             Aucune exception n'est levée.
         """
-
+        self.view.clear_screen()
         while True:
-            self.view.clear_screen()
+
             choice = self.view.display_main_menu()
 
             if choice == constantes.MAIN_MENU_LOGIN:
@@ -195,6 +196,7 @@ class MainController:
                 print("input invalide")
 
     def manage_contract(self):
+        self.view.display_manage_contract()
         try:
             customer_to_manage = self.customer_controller.get_customer()
             return self.contract_controller.manage_contracts(
@@ -204,6 +206,7 @@ class MainController:
             print("error", err)
 
     def update_customer_contract_sales(self):
+
         try:
             customer_to_manage = self.customer_controller.get_customer(
                 self.user
@@ -213,6 +216,7 @@ class MainController:
             print("error", err)
 
     def create_event_sales(self):
+        self.view.display_create_event()
         try:
             customer_to_manage = self.customer_controller.get_customer(
                 self.user
@@ -227,11 +231,17 @@ class MainController:
             print("error", err)
 
     def set_support_on_event(self):
+        self.view.display_set_support_on_event()
         try:
             self.user_controller.view.display_support_on_event()
             support_user = self.user_controller.get_user()
-            if support_user.role != models.UserRole.SUPPORT:
-                return print("NOT SUPPORT USER")
+            support_user_role = (
+                self.session.query(models.Role)
+                .filter_by(id=support_user.role_id)
+                .first()
+            )
+            if support_user_role.name != constantes.ROLE_SUPPORT:
+                return self.view.display_not_support_user()
 
             return self.event_controller.update_event(
                 support_user=support_user,

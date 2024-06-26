@@ -16,9 +16,8 @@ class EventController:
     ):
         # Vérifier si le contrat est signé
         if not contract.is_signed:
-            return print(
-                "The contract hasn't been signed, so it's impossible to create an event."
-            )
+            return self.view.display_contract_not_signed()
+
         self.view.display_new_event_panel()
         start_date, end_date = self.set_new_event()
 

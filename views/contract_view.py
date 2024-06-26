@@ -1,46 +1,59 @@
 import models
 import views
 import constantes
+from rich.panel import Panel
 
 
-class ContractView:
+class ContractView(views.BaseView):
     def input_contract_management(self):
-        print(constantes.LOG_OUT, "- Exit")
-        print(
-            constantes.MANAGER_CREATE_NEW_CONTRACT, "- Create a new Contract"
+        self.console.print("[menu_choice]" + constantes.LOG_OUT + " - Exit[/]")
+        self.console.print(
+            "[menu_choice]"
+            + constantes.MANAGER_CREATE_NEW_CONTRACT
+            + " - Create a new Contract[/]"
         )
-        print(constantes.MANAGER_UPDATE_CONTRACT, "- Update a Contract")
+        self.console.print(
+            "[menu_choice]"
+            + constantes.MANAGER_UPDATE_CONTRACT
+            + " - Update a Contract[/]"
+        )
         selection = -1
         while selection < 0 or selection > 2:
             try:
-
-                selection = int(input("Select an action : "))
+                self.console.print("Select an action : ", style="input")
+                selection = int(input())
                 if selection > 2 or selection < 0:
                     raise ValueError
             except ValueError:
-                print("bad input")
+                self.console.print("[error]bad input[/]")
         return selection
 
     def input_contract_amount(self):
-
-        return input("Total amount : ")
+        self.console.print("Total amount : ", style="input")
+        return input()
 
     def input_contract_remaining_amount(self, remaining_amount, total_amount):
-        print(f"remaining on bill: {remaining_amount}")
+        self.console.print(
+            f"[menu_text]remaining on bill: {remaining_amount}[/]"
+        )
 
         new_remaining_amount = ""
         while new_remaining_amount == "":
             try:
-                new_remaining_amount = int(
-                    input("Insert the new amount remaining to be paid : ")
+                self.console.print(
+                    "Insert the new amount remaining to be paid : ",
+                    style="input",
                 )
+                new_remaining_amount = int(input())
                 if new_remaining_amount > total_amount:
-                    print("ERROR_REMAINING AMOUNT_TO_BIG")
+                    self.console.print(
+                        "[error]ERROR_REMAINING AMOUNT_TO_BIG[/]"
+                    )
                     new_remaining_amount = ""
                     continue
                 continue
             except ValueError:
-                print("bad input")
+                self.console.print("[error]bad input[/]")
                 continue
         return new_remaining_amount
 
@@ -48,11 +61,13 @@ class ContractView:
 
         int_signed = -1
         while int_signed == -1:
-            user_input = input(
-                "Contract already signed ? (0  for NO / 1 for YES) : "
+            self.console.print(
+                "Contract already signed ? (0  for NO / 1 for YES) : ",
+                style="input",
             )
+            user_input = input()
             if user_input != "0" and user_input != "1":
-                print("bad input")
+                self.console.print("[error]bad input[/]")
                 continue
             int_signed = user_input
             continue
@@ -69,28 +84,37 @@ class ContractView:
         }
 
     def display_contract_informations(self, contract: models.Contract):
-        return print(
-            f"Customer : \n"
-            f"First name : {contract.customer.first_name} \n "
-            f"Last name  : {contract.customer.last_name} \n"
-            f"Contact : \n"
-            f"Username  : {contract.user.username}\n "
-            f"Fullname  : {contract.user.full_name} \n"
-            f"Is signed : {contract.is_signed} \n"
-            f"Remaining amount : {contract.remaining_amount} \n"
-            f"Created date     : {contract.creation_date} \n"
+        return self.console.print(
+            f"[menu_text]First name :[/] {contract.customer.first_name} \n"
+            f"[menu_text]Last name  :[/] {contract.customer.last_name} \n"
+            f"[menu_text]Contact : [/]\n"
+            f"[menu_text]Username  :[/] {contract.user.username} \n"
+            f"[menu_text]Fullname  :[/] {contract.user.full_name} \n"
+            f"[menu_text]Is signed :[/] {contract.is_signed} \n"
+            f"[menu_text]Remaining amount :[/] {contract.remaining_amount} \n"
+            f"[menu_text]Created date     :[/] {contract.creation_date} \n"
         )
 
     def input_list_contracts_filters(self):
-        print("-- List contracts Filters --")
-        print(constantes.MANAGER_LIST_CONTRACT_NO_FILTER, " - No filters")
-        print(
-            constantes.MANAGER_LIST_CONTRACT_NOT_SIGNED,
-            " - contracts not signed",
+        self.console.print(
+            Panel("--   List contracts Filters   --", expand=True),
+            style="menu_text",
         )
-        print(
-            constantes.MANAGER_LIST_CONTRACT_NOT_TOTAL_PAID,
-            " - contracts not totally paid",
+
+        self.console.print(
+            "[menu_choice]"
+            + constantes.MANAGER_LIST_CONTRACT_NO_FILTER
+            + " - No filters[/]"
+        )
+        self.console.print(
+            "[menu_choice]"
+            + constantes.MANAGER_LIST_CONTRACT_NOT_SIGNED
+            + " - contracts not signed[/]"
+        )
+        self.console.print(
+            "[menu_choice]"
+            + constantes.MANAGER_LIST_CONTRACT_NOT_TOTAL_PAID
+            + " - contracts not totally paid[/]"
         )
         list_contract_filter = ""
         while list_contract_filter == "":
@@ -98,16 +122,21 @@ class ContractView:
                 list_contract_filter = int(input())
                 if list_contract_filter < 1 or list_contract_filter > 3:
                     list_contract_filter = ""
-                    print("BAD MENU INPUT")
+                    self.console.print("[error]BAD MENU INPUT[/]")
                     continue
                 continue
             except ValueError:
-                print("BAD MENU INPUT")
+                self.console.print("[error]BAD MENU INPUT[/]")
                 continue
         return list_contract_filter
 
     def display_new_contract_validation(self):
-        return print("Contract successfully created")
+        self.console.print("[success]Contract successfully created[/]")
+        self.wait_for_key_press()
 
     def display_update_contract_validation(self):
-        return print("Contract successfully updated")
+        self.console.print("[success]Contract successfully updated[/]")
+        self.wait_for_key_press()
+
+    def display_no_contract_found(self):
+        return self.console.print("[error]No contract found[/]")

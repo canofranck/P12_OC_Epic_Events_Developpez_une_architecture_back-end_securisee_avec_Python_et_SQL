@@ -1,32 +1,42 @@
 import models
 
-from views.base_view import BaseView
+import views
+from rich.panel import Panel
 
 
-class CustomerView(BaseView):
+class CustomerView(views.BaseView):
 
     def input_first_name(self):
-
-        return input("First name : ")
+        self.console.print("First name : ", style="input")
+        return input()
 
     def input_last_name(self):
-
-        return input("Last name : ")
+        self.console.print("Last name : ", style="input")
+        return input()
 
     def input_email(self):
 
-        return input("email customer : ")
+        self.console.print("email customer : ", style="input")
+        return input()
 
     def input_phone_number(self):
+        self.console.print(
+            "phone number: (must start with +33) : ", style="input"
+        )
 
-        return input("phone number: (must start with +33) : ")
+        return input()
 
     def input_compagny_name(self):
+        self.console.print("Compagny name : ", style="input")
 
-        return input("Compagny name : ")
+        return input()
 
     def input_customer_information(self):
-        print("--- Customer Management ---")
+        self.console.print(
+            Panel("---   Customer Management   ---", expand=True),
+            style="menu_text",
+        )
+
         fist_name = self.input_first_name()
         last_name = self.input_last_name()
         compagny_name = self.input_compagny_name()
@@ -38,24 +48,26 @@ class CustomerView(BaseView):
         }
 
     def display_new_customer_validation(self):
-        print("New customer correctly created")
+        self.console.print("[success]New customer correctly created[/]")
         self.wait_for_key_press()
 
     def display_customer_information(self, customer: models.Customer):
-        return print(
-            f"First Name : {customer.first_name} \n"
-            f"Last Name : {customer.last_name} \n"
-            f"Phone : {customer.phone_number} \n"
-            f"Email : {customer.email} \n"
-            f"Compagny : {customer.compagny_name} \n"
-            f"Contact : {customer.user.full_name} \n"
-            f"Creation date : {customer.creation_date} \n"
-            f"Last date contact: {customer.last_contact_date} \n"
-            "--------------- \n"
+        return self.console.print(
+            f"[menu_text]First Name :[/] {customer.first_name} \n"
+            f"[menu_text]Last Name :[/] {customer.last_name} \n"
+            f"[menu_text]Phone :[/] {customer.phone_number} \n"
+            f"[menu_text]Email :[/] {customer.email} \n"
+            f"[menu_text]Compagny :[/] {customer.compagny_name} \n"
+            f"[menu_text]Contact :[/] {customer.user.full_name} \n"
+            f"[menu_text]Creation date :[/] {customer.creation_date} \n"
+            f"[menu_text]Last date contact: [/] {customer.last_contact_date} \n"
         )
 
     def input_update_customer(self):
-        print("--- Update Customer Management ---")
+        self.console.print(
+            Panel("--- Update Customer Management ---", expand=True),
+            style="menu_text",
+        )
         first_name = self.input_first_name()
         last_name = self.input_last_name()
         email = self.input_email()
