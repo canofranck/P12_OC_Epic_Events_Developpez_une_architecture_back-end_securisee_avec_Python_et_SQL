@@ -188,7 +188,7 @@ class MainController:
             case constantes.LIST_EVENTS:
                 self.event_controller.list_events()
             case constantes.SUPPORT_MANAGE_EVENT:
-                self.event_controller.update_event(
+                self.event_controller.sales_manager_events(
                     support_user=None,
                     assigned_support=self.user,
                 )
@@ -196,6 +196,7 @@ class MainController:
                 print("input invalide")
 
     def manage_contract(self):
+
         self.view.display_manage_contract()
         try:
             customer_to_manage = self.customer_controller.get_customer()
@@ -206,7 +207,7 @@ class MainController:
             print("error", err)
 
     def update_customer_contract_sales(self):
-
+        self.view.display_update_contract()
         try:
             customer_to_manage = self.customer_controller.get_customer(
                 self.user
@@ -217,6 +218,7 @@ class MainController:
 
     def create_event_sales(self):
         self.view.display_create_event()
+
         try:
             customer_to_manage = self.customer_controller.get_customer(
                 self.user
@@ -224,6 +226,9 @@ class MainController:
             contract_to_manage = self.contract_controller.get_contract(
                 customer_to_manage
             )
+            if not contract_to_manage:
+                print("Aucun contrat trouvé pour ce client.")
+                return
             return self.event_controller.create_event(
                 customer_to_manage, contract_to_manage
             )

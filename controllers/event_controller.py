@@ -3,6 +3,7 @@ import models
 import views
 from datetime import datetime
 import validators
+from rich.table import Table
 
 
 class EventController:
@@ -105,22 +106,30 @@ class EventController:
             filters["user"] = assigned_support
         event = self.session.query(models.Event).filter_by(**filters).first()
         if event is None:
-            raise print("EVENT_NOT_FOUND")
+            raise ValueError("EVENT_NOT_FOUND")
         return event
 
     def list_events(self):
         event_filters_input = self.view.input_list_events_filters()
         filters = []
         if event_filters_input == 1:
-            # Filtrer les événements que l'utilisateur gère
-            filters.append(models.Event.user == self.user)
+
+            filters.append(True)
         elif event_filters_input == 2:
-            # Filtrer les événements sans support
-            filters.append(models.Event.user == None)
+            # Filtrer les évents de l user
+            filters.append(
+                or_(
+                    models.Event.contract.has(manager_id=self.user.id),
+                    models.Event.support_id == self.user.id,
+                )
+            )
         elif event_filters_input == 3:
             # Filtrer les événements que l'utilisateur gère et les événements sans support
             filters.append(
-                or_(models.Event.user == self.user, models.Event.user == None)
+                or_(
+                    models.Event.support_id == self.user.id,
+                    models.Event.support_id == None,
+                )
             )
 
         if filters:
@@ -130,4 +139,27 @@ class EventController:
             events = self.session.query(models.Event).all()
 
         for event in events:
+            table = Table(title=f"Liste des events")
+            table.add_column(
+                "Champ", justify="left", style="cyan", no_wrap=True
+            )
+            table.add_column(
+                "Valeur", justify="left", style="cyan", no_wrap=True
+            )
+            table.add_row("Event Name ", f"{event.event_name}")
+            table.add_row("Customer Name", f"{event.customer_name}")
+            table.add_row("Customer Contact", f"{event.customer_contact}")
+            table.add_row("Date de début", f"{event.start_date}")
+            table.add_row("End Date", f"{event.end_date}")
+            table.add_row("Location", f"{event.location}")
+            table.add_row("Number of attendees", f"{event.nb_attendees}")
+            table.add_row("Notes", f"{event.notes}")
             self.view.display_event(event)
+
+    def sales_manager_events(self, support_user=None, assigned_support=None):
+        views.MainView.clear_screen(self)
+        self.view.display_support_manage_events()
+        self.update_event(
+            support_user=None,
+            assigned_support=self.user,
+        )

@@ -2,6 +2,7 @@ import models
 import views
 import constantes
 from rich.panel import Panel
+from rich.table import Table
 
 
 class ContractView(views.BaseView):
@@ -84,16 +85,23 @@ class ContractView(views.BaseView):
         }
 
     def display_contract_informations(self, contract: models.Contract):
-        return self.console.print(
-            f"[menu_text]First name :[/] {contract.customer.first_name} \n"
-            f"[menu_text]Last name  :[/] {contract.customer.last_name} \n"
-            f"[menu_text]Contact : [/]\n"
-            f"[menu_text]Username  :[/] {contract.user.username} \n"
-            f"[menu_text]Fullname  :[/] {contract.user.full_name} \n"
-            f"[menu_text]Is signed :[/] {contract.is_signed} \n"
-            f"[menu_text]Remaining amount :[/] {contract.remaining_amount} \n"
-            f"[menu_text]Created date     :[/] {contract.creation_date} \n"
+        table = Table(title=f"Liste Contrat")
+        table.add_column("Champ", justify="left", style="cyan", no_wrap=True)
+        table.add_column("Valeur", justify="left", style="cyan", no_wrap=True)
+        table.add_row("Client First Name", f"{contract.customer.first_name}")
+        table.add_row("Client Last Name", f"{contract.customer.last_name}")
+        table.add_row(
+            "Commercial Contact Username", f"{contract.customer.user.username}"
         )
+
+        table.add_row(
+            "Commercial contact Fullname", f"{contract.user.full_name}"
+        )
+        table.add_row("Is signed", f"{contract.is_signed}")
+        table.add_row("Remaining amount", f"{contract.remaining_amount}")
+        table.add_row("Creation date", f"{contract.creation_date}")
+        self.console.print(table)
+        self.wait_for_key_press()
 
     def input_list_contracts_filters(self):
         self.console.print(
@@ -127,8 +135,9 @@ class ContractView(views.BaseView):
                 continue
             except ValueError:
                 self.console.print("[error]BAD MENU INPUT[/]")
+                list_contract_filter = ""
                 continue
-        return list_contract_filter
+        return str(list_contract_filter)
 
     def display_new_contract_validation(self):
         self.console.print("[success]Contract successfully created[/]")
@@ -140,3 +149,9 @@ class ContractView(views.BaseView):
 
     def display_no_contract_found(self):
         return self.console.print("[error]No contract found[/]")
+
+    def display_new_contract(self):
+        self.console.print(
+            Panel("---   New Contract management   ---", expand=True),
+            style="menu_text",
+        )

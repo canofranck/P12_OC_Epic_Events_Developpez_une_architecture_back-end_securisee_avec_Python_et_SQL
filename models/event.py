@@ -22,7 +22,7 @@ class Event(Base):
 
     event_name = Column(String(50), unique=True, index=True)
     customer_name = Column(String(50), unique=True, index=True)
-    customer_contact = Column(String(50), unique=True, index=True)
+    customer_contact = Column(String(50), unique=False, index=True)
     start_date = Column(DateTime, unique=False, index=True)
     end_date = Column(DateTime, unique=False, index=True)
     location = Column(String(50), unique=False, index=True)

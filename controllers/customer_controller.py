@@ -3,6 +3,8 @@ import models
 import validators
 import views
 from datetime import datetime
+from rich.console import Console
+from rich.table import Table
 
 
 class CustomerController:
@@ -91,12 +93,37 @@ class CustomerController:
             self.session.query(models.Customer).filter_by(**filters).first()
         )
         if customer is None:
-            raise print("CUSTOMER_NOT_FOUND")
+            raise ValueError("CUSTOMER_NOT_FOUND")
         return customer
 
     def list_customers(self):
+
         customers = self.session.query(models.Customer).all()
         if len(customers) == 0:
             return print(" Customer not found")
+
+        table = Table(title="Liste des Clients")
+        table.add_column("Prénom", justify="left", style="input", no_wrap=True)
+        table.add_column("Nom", justify="left", style="input", no_wrap=True)
+        table.add_column("Email", justify="left", style="input", no_wrap=True)
+        table.add_column(
+            "Téléphone", justify="left", style="input", no_wrap=True
+        )
+        table.add_column(
+            "Nom de l'entreprise", justify="left", style="input", no_wrap=True
+        )
+        table.add_column(
+            "ID de vente", justify="left", style="input", no_wrap=True
+        )
+
+        for customer in customers:
+            table.add_row(
+                customer.first_name,
+                customer.last_name,
+                customer.email,
+                customer.phone_number,
+                customer.compagny_name,
+                str(customer.sales_id),
+            )
         for customer in customers:
             self.view.display_customer_information(customer)

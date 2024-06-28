@@ -3,6 +3,7 @@ import views
 from datetime import datetime
 from sqlalchemy import and_
 import constantes
+from rich.table import Table
 
 
 class ContractController:
@@ -14,6 +15,34 @@ class ContractController:
     def manage_contracts(self, customer: models.Customer):
         contract_to_manage = self.get_contract(customer)
         if contract_to_manage is not None:
+            table = Table(title="Liste Contrat")
+            table.add_column(
+                "First name:", justify="left", style="input", no_wrap=True
+            )
+            table.add_column(
+                "Last name:", justify="left", style="input", no_wrap=True
+            )
+            table.add_column(
+                "Contact:", justify="left", style="input", no_wrap=True
+            )
+            table.add_column(
+                "Username:", justify="left", style="input", no_wrap=True
+            )
+            table.add_column(
+                "Fullname:", justify="left", style="input", no_wrap=True
+            )
+            table.add_column(
+                "Is signed:", justify="left", style="input", no_wrap=True
+            )
+            table.add_column(
+                "Remaining amount:",
+                justify="left",
+                style="input",
+                no_wrap=True,
+            )
+            table.add_column(
+                "Creation date:", justify="left", style="input", no_wrap=True
+            )
             self.view.display_contract_informations(contract_to_manage)
 
         menu_selection = self.view.input_contract_management()
@@ -28,6 +57,7 @@ class ContractController:
                 print("BAD MENU INPUT")
 
     def create_contract(self, customer: models.Customer):
+        self.view.display_new_contract()
         input_new_contract = self.view.input_new_contract()
         contract = models.Contract(
             customer=customer,
@@ -45,6 +75,7 @@ class ContractController:
             print("error", err)
 
     def update_contract(self, customer: models.Customer):
+
         try:
             contract_to_manage = self.get_contract(customer)
             self.view.display_contract_informations(contract_to_manage)
@@ -53,7 +84,7 @@ class ContractController:
                 contract_to_manage.is_signed
                 and contract_to_manage.remaining_amount == 0
             ):
-                return print("CONTRACT UPDATE ERROR")
+                return print("CONTRACT ALREADY SIGNED AND PAID")
 
             if not contract_to_manage.is_signed:
                 contract_to_manage.is_signed = (
@@ -90,13 +121,20 @@ class ContractController:
         filters_input = self.view.input_list_contracts_filters()
         filters = []
         if filters_input == constantes.MANAGER_LIST_CONTRACT_NOT_SIGNED:
-            filters.append(models.Contract.is_signed == False)
-        if filters_input == constantes.MANAGER_LIST_CONTRACT_NOT_TOTAL_PAID:
+            filters.append(models.Contract.is_signed.is_(False))
+        elif filters_input == constantes.MANAGER_LIST_CONTRACT_NOT_TOTAL_PAID:
             filters.append(models.Contract.remaining_amount > 0)
+        elif filters_input == constantes.MANAGER_LIST_CONTRACT_NO_FILTER:
+            filters = []  # Pas de filtre pour tous les contrats
 
-        contracts = (
-            self.session.query(models.Contract).filter(and_(*filters)).all()
-        )
+        if filters:
+            contracts = (
+                self.session.query(models.Contract)
+                .filter(and_(*filters))
+                .all()
+            )
+        else:
+            contracts = self.session.query(models.Contract).all()
 
         for contract in contracts:
             self.view.display_contract_informations(contract)

@@ -81,3 +81,9 @@ class MainView(views.BaseView):
             Panel("---   Create Event   ---", expand=True),
             style="menu_text",
         )
+
+    def display_update_contract(self):
+        self.console.print(
+            Panel("---   Update Contract management   ---", expand=True),
+            style="menu_text",
+        )

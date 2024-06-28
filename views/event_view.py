@@ -2,28 +2,31 @@ import constantes
 import models
 import views
 from rich.panel import Panel
+from rich.table import Table
 
 
 class EventView(views.BaseView):
 
     def display_event(self, event: models.Event):
-        self.console.print(
-            f"[menu_text]Event Name       :[/] {event.event_name} \n"
-            f"[menu_text]Customer Name    :[/] {event.customer_name} \n"
-            f"[menu_text]Customer Contact :[/] {event.customer_contact} \n"
-            f"[menu_text]Start Date       :[/] {event.start_date} \n"
-            f"[menu_text]End Date         :[/] {event.end_date} \n"
-            f"[menu_text]Location         :[/] {event.location} \n"
-            f"[menu_text]Number attendees :[/] {event.nb_attendees} \n"
-            f"[menu_text]Notes            :[/] {event.notes} \n"
-        )
-        if event.user is not None:
-            self.console.print(f"[menu_text]Support :[/] {event.user.email}")
-
+        table = Table(title=f"Liste des events")
+        table.add_column("Champ", justify="left", style="cyan", no_wrap=True)
+        table.add_column("Valeur", justify="left", style="cyan", no_wrap=True)
+        table.add_row("Event Name", f"{event.event_name}")
+        table.add_row("Event ID", f"{event.id}")
+        table.add_row("Contract ID", f"{event.contract_id}")
         if event.customer_name is not None:
-            self.console.print(
-                f"[menu_text]Customer :[/] {event.customer_name} \n"
-            )
+            table.add_row("Customer Name", f"{event.customer_name}")
+        table.add_row("Sales Contact", f"{event.customer_contact}")
+        table.add_row("Event Start Date", f"{event.start_date}")
+        table.add_row("Event End Date", f"{event.end_date}")
+        table.add_row("Event Location", f"{event.location}")
+        table.add_row("Number of attendees", f"{event.nb_attendees}")
+        table.add_row("Event Notes", f"{event.notes}")
+        if event.user is not None:
+            table.add_row("Support", f"{event.user.email}")
+
+        self.console.print(table)
+        self.wait_for_key_press()
 
     def display_new_event_panel(self):
         self.console.print(
@@ -100,16 +103,6 @@ class EventView(views.BaseView):
             + constantes.SALES_LIST_EVENT_NO_SUPPORT
             + " - Display events that have no support [/]"
         )
-        self.console.print(
-            "[menu_choice]"
-            + constantes.SALES_LIST_EVENT_ONLY_YOURS
-            + " - Only the events you manage [/]"
-        )
-        self.console.print(
-            "[menu_choice]"
-            + constantes.SALES_LIST_EVENT_NO_SUPPORT
-            + " - Display events that have no support [/]"
-        )
 
         list_event_filter = ""
         while list_event_filter == "":
@@ -171,3 +164,9 @@ class EventView(views.BaseView):
             "[error]The contract hasn't been signed, so it's impossible to create an event.[/]"
         )
         self.wait_for_key_press()
+
+    def display_support_manage_events(self):
+        self.console.print(
+            Panel("---   Support Events management   ---", expand=True),
+            style="menu_text",
+        )

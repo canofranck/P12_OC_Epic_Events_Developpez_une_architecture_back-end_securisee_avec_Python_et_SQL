@@ -2,6 +2,7 @@ import models
 
 import views
 from rich.panel import Panel
+from rich.table import Table
 
 
 class CustomerView(views.BaseView):
@@ -52,16 +53,28 @@ class CustomerView(views.BaseView):
         self.wait_for_key_press()
 
     def display_customer_information(self, customer: models.Customer):
-        return self.console.print(
-            f"[menu_text]First Name :[/] {customer.first_name} \n"
-            f"[menu_text]Last Name :[/] {customer.last_name} \n"
-            f"[menu_text]Phone :[/] {customer.phone_number} \n"
-            f"[menu_text]Email :[/] {customer.email} \n"
-            f"[menu_text]Compagny :[/] {customer.compagny_name} \n"
-            f"[menu_text]Contact :[/] {customer.user.full_name} \n"
-            f"[menu_text]Creation date :[/] {customer.creation_date} \n"
-            f"[menu_text]Last date contact: [/] {customer.last_contact_date} \n"
+        self.console.print(
+            Panel("---   LIST CUSTOMERS   ---", expand=True),
+            style="menu_text",
         )
+        table = Table(
+            title=f" Client: {customer.first_name} {customer.last_name}"
+        )
+
+        table.add_column("Champ", justify="left", style="cyan", no_wrap=True)
+        table.add_column("Valeur", justify="left", style="cyan", no_wrap=True)
+
+        table.add_row("Prénom", customer.first_name)
+        table.add_row("Nom", customer.last_name)
+        table.add_row("Téléphone", customer.phone_number)
+        table.add_row("Email", customer.email)
+        table.add_row("Nom de l'entreprise", customer.compagny_name)
+        table.add_row("Contact commercial", customer.user.full_name)
+        table.add_row("Date de création", str(customer.creation_date))
+        table.add_row("Dernier contact", str(customer.last_contact_date))
+
+        self.console.print(table)
+        self.wait_for_key_press()
 
     def input_update_customer(self):
         self.console.print(
