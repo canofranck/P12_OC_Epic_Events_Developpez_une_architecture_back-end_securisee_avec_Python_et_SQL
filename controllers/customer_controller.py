@@ -5,15 +5,72 @@ import views
 from datetime import datetime
 from rich.console import Console
 from rich.table import Table
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class CustomerController:
+    """
+    The CustomerController class is responsible for managing customers within the application.
+
+    Attributes:
+        session: The database session used for database operations.
+        view: The view associated with customer operations.
+        user: The currently logged-in user.
+
+    Methods:
+        __init__(self, session, view, user=None):
+            Initializes the CustomerController with the given parameters.
+
+        create_customer(self):
+            Creates a new customer with the provided information.
+
+        set_new_customer_email(self):
+            Sets a new email for the customer after validating it.
+
+        is_email_in_database(self, email):
+            Checks if the provided email already exists in the database.
+
+        set_customer_phone(self):
+            Sets a new phone number for the customer.
+
+        update_customer(self):
+            Updates the customer information.
+
+        get_customer(self, user: models.User = None):
+            Retrieves the customer associated with the given user.
+
+        list_customers(self):
+            Lists all customers in the database.
+
+    """
+
     def __init__(self, session, view: views.CustomerView, user=None):
+        """
+        Initializes the CustomerController with the given parameters.
+
+        Args:
+            session: The database session used for database operations.
+            view: The view associated with customer operations.
+            user: The currently logged-in user (default is None).
+        """
         self.session = session
         self.view = view
         self.user = user
 
     def create_customer(self):
+        """
+        Creates a new customer with the provided information.
+
+        This method prompts the user to input the details of the new customer,
+        creates a new customer object, and saves it to the database. If an error
+        occurs during the process, the transaction is rolled back and an error
+        message is displayed.
+
+        Returns:
+            None
+        """
         if self.user is None:
             print("No user is currently logged in.")
 
@@ -35,6 +92,18 @@ class CustomerController:
             print("error", err)
 
     def set_new_customer_email(self):
+        """
+        Sets a new email address for the customer.
+
+        This method prompts the user to input a valid email address,
+        validates the email format, and checks if the email already exists
+        in the database. If the email is valid and does not exist in the database,
+        it is returned. Otherwise, an error message is displayed and the user
+        is prompted to input the email again.
+
+        Returns:
+            str: The validated email address.
+        """
         email = ""
         while email == "":
             try:
@@ -49,6 +118,21 @@ class CustomerController:
         return email
 
     def is_email_in_database(self, email):
+        """
+        Checks if the given email address already exists in the database.
+
+        This method queries the database to check if a user with the specified email address
+        already exists. If the email address is found in the database, an exception is raised.
+
+        Args:
+            email (str): The email address to check.
+
+        Raises:
+            ValueError: If the email address already exists in the database.
+
+        Returns:
+            None
+        """
         if (
             self.session.query(models.User).filter_by(email=email).first()
             is not None
@@ -56,6 +140,18 @@ class CustomerController:
             raise print("EMAIL ALREADY EXISTS")
 
     def set_customer_phone(self):
+        """
+        Sets a new phone number for the customer.
+
+        This method prompts the user to input a valid phone number,
+        validates the phone number format, and checks if the phone number already exists
+        in the database. If the phone number is valid and does not exist in the database,
+        it is returned. Otherwise, an error message is displayed and the user
+        is prompted to input the phone number again.
+
+        Returns:
+            str: The validated phone number.
+        """
         phone = ""
         while phone == "":
             try:
@@ -69,6 +165,20 @@ class CustomerController:
         return phone
 
     def update_customer(self):
+        """
+        Updates the customer information.
+
+        This method retrieves the customer associated with the currently logged-in user,
+        displays the current customer information, and prompts the user to input new customer information.
+        The customer's phone number, first name, last name, company name, and last contact date are updated
+        with the new values provided by the user. The updated information is then committed to the database.
+
+        Raises:
+            ValueError: If an error occurs during the update process.
+
+        Returns:
+            None
+        """
         try:
             customer = self.get_customer(self.user)
             self.view.display_customer_information(customer)
@@ -84,6 +194,21 @@ class CustomerController:
             print("error", err)
 
     def get_customer(self, user: models.User = None):
+        """
+        Retrieves the customer associated with the given user.
+
+        This method queries the database to find the customer that belongs to the specified user.
+        If no customer is found, a ValueError is raised.
+
+        Args:
+            user (models.User, optional): The user whose customer is being retrieved. Defaults to None.
+
+        Returns:
+            models.Customer: The customer associated with the given user.
+
+        Raises:
+            ValueError: If no customer is found.
+        """
         email = self.view.input_email()
         filters = {"email": email}
         if user is not None:
@@ -97,7 +222,18 @@ class CustomerController:
         return customer
 
     def list_customers(self):
+        """
+        Lists all customers in the database.
 
+        This method retrieves all customers from the database and displays their information
+        in a formatted table. If no customers are found, a message is displayed indicating
+        that no customers were found.
+
+        Returns:
+            None
+        """
+
+        logger.debug("Début de la méthode list_customers")
         customers = self.session.query(models.Customer).all()
         if len(customers) == 0:
             return print(" Customer not found")

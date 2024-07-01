@@ -1,26 +1,68 @@
-# from models.user import User, UserRole
-# from views.main_view import MainView
-# from views.user_view import UserView
-# from controllers.user_controller import UserController
-
-# from controllers.report_controller import ReportController
-# from controllers.tournament_controller import TournamentController
+import os
 import constantes
-
-# import logging
+import logging
 import models
 import controllers
 import views
+import sentry_sdk
 
-
-# logging.basicConfig(level=logging.DEBUG)
-# logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class MainController:
-    """Contrôleur principal de l'application."""
+    """
+    MainController is the central controller for the application.
+    It initializes various controllers and views, and manages the main flow of the application.
+
+    Attributes:
+        session: The database session used for database operations.
+        salt: The salt used for hashing passwords.
+        secret_key: The secret key used for encoding and decoding JWT tokens.
+        view: The main view of the application.
+        user_controller: The controller responsible for user-related operations.
+        customer_controller: The controller responsible for customer-related operations.
+        contract_controller: The controller responsible for contract-related operations.
+        event_controller: The controller responsible for event-related operations.
+        user: The currently logged-in user.
+
+    Methods:
+        __init__(self, session, salt, secret_key, console):
+            Initializes the MainController with the given parameters.
+
+        run(self):
+            Runs the main loop of the application, displaying the main menu and handling user input.
+
+        create_admin(self):
+            Creates an admin user if it does not already exist.
+
+        set_user_to_controllers(self, user):
+            Sets the user for the main controller and its associated controllers.
+
+        get_user_main_menu(self):
+            Displays the main menu for the logged-in user and processes their selection.
+    """
 
     def __init__(self, session, salt, secret_key, console):
+        """
+        Initializes the MainController with the given parameters.
+
+        Args:
+            session: The database session used for database operations.
+            salt: The salt used for hashing passwords.
+            secret_key: The secret key used for encoding and decoding JWT tokens.
+            console: The console object used for displaying views.
+
+        Attributes:
+            session: The database session used for database operations.
+            salt: The salt used for hashing passwords.
+            secret_key: The secret key used for encoding and decoding JWT tokens.
+            view: The main view of the application.
+            user_controller: The controller responsible for user-related operations.
+            customer_controller: The controller responsible for customer-related operations.
+            contract_controller: The controller responsible for contract-related operations.
+            event_controller: The controller responsible for event-related operations.
+            user: The currently logged-in user.
+        """
         self.session = session
         self.salt = salt
         self.secret_key = secret_key
@@ -41,37 +83,58 @@ class MainController:
         self.user = None
 
     def run(self):
-        """Lance l'application principale.
-        Cette méthode démarre l'application et affiche le menu principal.
-        En fonction du choix de l'utilisateur, elle dirige vers d'autres
-        fonctionnalités telles que le menu des joueurs, le menu des tournois,
-        le menu de rapports ou termine l'application.
-        Args:
-            Aucun argument requis.
-        Returns:
-            Aucune valeur de retour.
-        Raises:
-            Aucune exception n'est levée.
         """
+        Runs the main loop of the application, displaying the main menu and handling user input.
+
+        The method continuously displays the main menu and waits for the user to select an option.
+        Depending on the user's choice, it either initiates the login process, quits the application,
+        or displays an invalid option message. If an error occurs during the execution, it captures
+        the exception and logs the error.
+
+        Raises:
+            Exception: If an error occurs during the execution of the main loop.
+        """
+
         self.view.clear_screen()
         while True:
+            try:
+                choice = self.view.display_main_menu()
+                logger.debug("Choix de l'utilisateur : %s", choice)
+                if choice == constantes.MAIN_MENU_LOGIN:
+                    user = self.user_controller.run_login_menu()
+                    self.set_user_to_controllers(user)
+                    self.view.clear_screen()
+                    self.view.input_welcome_user(user)
+                    logger.debug(
+                        "Utilisateur connecté avec succès : ", user.username
+                    )
+                    self.get_user_main_menu()
 
-            choice = self.view.display_main_menu()
-
-            if choice == constantes.MAIN_MENU_LOGIN:
-                user = self.user_controller.run_login_menu()
-                self.set_user_to_controllers(user)
-                self.view.clear_screen()
-                self.view.input_welcome_user(user)
-                self.get_user_main_menu()
-            elif choice == constantes.MAIN_MENU_QUIT:
-                print("Au revoir !")
-                break
-            else:
-                self.view.display_invalid_option_message()
+                elif choice == constantes.MAIN_MENU_QUIT:
+                    logger.debug(
+                        "L'utilisateur a choisi de quitter l'application."
+                    )
+                    print("Au revoir !")
+                    break
+                else:
+                    self.view.display_invalid_option_message()
+                    logger.debug(
+                        "Option invalide sélectionnée dans le menu principal."
+                    )
+            except Exception as e:
+                sentry_sdk.capture_exception(e)
+                logger.error("Une erreur est survenue : %s", e)
+                print(
+                    "Une erreur est survenue. Veuillez consulter les logs pour plus de détails."
+                )
 
     def create_admin(self):
+        """
+        Creates an admin user if it does not already exist.
 
+        This method checks if an admin user with the username "Admin" exists in the database.
+        If not, it creates a new admin user with the role "MANAGER" and default credentials.
+        """
         admin_user = (
             self.session.query(models.User).filter_by(username="Admin").first()
         )
@@ -97,12 +160,34 @@ class MainController:
             self.session.commit()
 
     def set_user_to_controllers(self, user):
+        """
+        Sets the user for the main controller and its associated controllers.
+
+        This method assigns the given user to the main controller as well as to the
+        customer_controller, contract_controller, and event_controller.
+
+        Args:
+            user (models.User): The user to be set for the controllers.
+        """
         self.user = user
         self.customer_controller.user = user
         self.contract_controller.user = user
         self.event_controller.user = user
 
     def get_user_main_menu(self):
+        """
+        Displays the main menu for the logged-in user and processes their selection.
+
+        This method retrieves the role of the currently logged-in user and displays the
+        appropriate menu options based on their role. It then processes the user's menu
+        selection and performs the corresponding actions.
+
+        The method continues to display the menu and process selections until the user
+        chooses to log out or an invalid input is encountered.
+
+        Returns:
+            None
+        """
 
         running = True
         while running:
@@ -111,8 +196,8 @@ class MainController:
                 role_name
             )
 
-            if menu_selection == 0:
-                break
+            if menu_selection == "0":
+                self.logout()
             match role_name:
                 case constantes.ROLE_MANAGER:
                     self.process_manager_action(menu_selection)
@@ -123,11 +208,25 @@ class MainController:
                 case constantes.ROLE_ADMIN:
                     self.process_admin_action(menu_selection)
                 case _:
-                    print("error")
+                    print("input invalide")
                     running = False
                     continue
 
     def process_manager_action(self, menu_selection):
+        """
+        Process the menu selection for a manager.
+
+        This method processes the menu selection made by a manager and performs the
+        corresponding action. It handles various options such as listing customers,
+        contracts, events, assigning support to an event, managing users, and managing
+        contracts.
+
+        Args:
+            menu_selection (str): The menu option selected by the manager.
+
+        Returns:
+            None
+        """
 
         match menu_selection:
             case constantes.LIST_CUSTOMERS:
@@ -152,6 +251,19 @@ class MainController:
                 print("input invalide")
 
     def process_sales_action(self, menu_selection):
+        """
+        Process the menu selection for a sales representative.
+
+        This method processes the menu selection made by a sales representative and performs the
+        corresponding action. It handles various options such as listing customers, contracts, events,
+        creating and updating customers, updating contracts, and creating events.
+
+        Args:
+            menu_selection (str): The menu option selected by the sales representative.
+
+        Returns:
+            None
+        """
 
         match menu_selection:
             case constantes.LIST_CUSTOMERS:
@@ -180,6 +292,19 @@ class MainController:
                 print("input invalide")
 
     def process_support_action(self, menu_selection):
+        """
+        Process the menu selection for a support representative.
+
+        This method processes the menu selection made by a support representative and performs the
+        corresponding action. It handles various options such as listing customers, contracts, events,
+        and managing events.
+
+        Args:
+            menu_selection (str): The menu option selected by the support representative.
+
+        Returns:
+            None
+        """
         match menu_selection:
             case constantes.LIST_CUSTOMERS:
                 self.customer_controller.list_customers()
@@ -196,6 +321,16 @@ class MainController:
                 print("input invalide")
 
     def manage_contract(self):
+        """
+        Manage contracts for a customer.
+
+        This method displays the contract management interface and allows the user to manage contracts
+        for a selected customer. It handles the process of selecting a customer and then managing their
+        contracts.
+
+        Returns:
+            None
+        """
 
         self.view.display_manage_contract()
         try:
@@ -207,6 +342,16 @@ class MainController:
             print("error", err)
 
     def update_customer_contract_sales(self):
+        """
+        Update the sales information for a customer's contract.
+
+        This method displays the interface for updating the sales information of a customer's contract.
+        It handles the process of selecting a customer and then updating their contract with the new
+        sales information.
+
+        Returns:
+            None
+        """
         self.view.display_update_contract()
         try:
             customer_to_manage = self.customer_controller.get_customer(
@@ -217,6 +362,16 @@ class MainController:
             print("error", err)
 
     def create_event_sales(self):
+        """
+        Create a new event for a customer's contract.
+
+        This method displays the interface for creating a new event for a customer's contract.
+        It handles the process of selecting a customer and their contract, and then creating
+        a new event associated with that contract.
+
+        Returns:
+            None
+        """
         self.view.display_create_event()
 
         try:
@@ -236,6 +391,15 @@ class MainController:
             print("error", err)
 
     def set_support_on_event(self):
+        """
+        Set support user on an event.
+
+        This method displays the interface for setting a support user on an event.
+        It handles the process of selecting a support user and assigning them to an event.
+
+        Returns:
+            None
+        """
         self.view.display_set_support_on_event()
         try:
             self.user_controller.view.display_support_on_event()
@@ -254,3 +418,35 @@ class MainController:
             )
         except ValueError as err:
             return print("error", err)
+
+    def logout(self):
+        """
+        Logout the current user.
+
+        This method handles the process of logging out the current user. It asks the user if they want to keep the token on the PC or delete it.
+        If the user chooses to keep the token, the program will flush Sentry and exit.
+        If the user chooses to delete the token, the token file will be removed, the session will be cleared, and the program will exit.
+
+        Returns:
+            None
+        """
+
+        choice = self.view.display_logout()
+        if choice == "y":
+            sentry_sdk.flush()
+            exit()
+        # delete token
+        email = self.user.email
+        filename = f"token_{email}.txt"
+        if os.path.exists(filename):
+            os.remove(filename)
+        # clear session
+        self.session.close()
+        self.user = None
+        self.user_controller.user = None
+        self.customer_controller.user = None
+        self.contract_controller.user = None
+        self.event_controller.user = None
+        # exit
+        sentry_sdk.flush()
+        exit()

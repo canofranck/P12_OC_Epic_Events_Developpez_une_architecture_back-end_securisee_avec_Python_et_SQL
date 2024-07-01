@@ -87,3 +87,13 @@ class MainView(views.BaseView):
             Panel("---   Update Contract management   ---", expand=True),
             style="menu_text",
         )
+
+    def display_logout(self):
+        self.console.print(
+            Panel("---   Logout   ---", expand=True),
+            style="menu_text",
+        )
+        self.console.print(
+            "Do you want to logout and keep credentials  Yes or No?"
+        )
+        return input()
