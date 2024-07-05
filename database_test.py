@@ -11,10 +11,16 @@ from models.event import Event
 from dotenv import load_dotenv
 import os
 
-DATABASE_USERNAME = os.getenv("username")
-DATABASE_PASSWORD = os.getenv("password")
-DATABASE_HOST = os.getenv("host")
-DATABASE_NAME = os.getenv("database_name")
+DATABASE_USERNAME = "root"
+DATABASE_PASSWORD = "Password2325"
+DATABASE_HOST = "localhost"
+DATABASE_NAME = "p12_testrole2_test"
+salt = "$2b$12$QhTfGmCB1FrbuySv8Op4IO"
+secret_key = "#zfhtz-4bpoqens*3jx9p9=hhz(67x#4atd5^5id%kh32kqkb2"
+
+print(
+    f"Initialisation de la base de données avec : {DATABASE_USERNAME}, {DATABASE_PASSWORD}, {DATABASE_HOST}, {DATABASE_NAME}"
+)
 
 DATABASE_URL = f"mysql+mysqlconnector://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@{DATABASE_HOST}/{DATABASE_NAME}"
 
@@ -27,6 +33,9 @@ def database_exists():
         bool: True if the database exists, False otherwise.
     """
     connection = None
+    print(
+        f"Initialisation de la base de données avec : {DATABASE_USERNAME}, {DATABASE_PASSWORD}, {DATABASE_HOST}, {DATABASE_NAME}"
+    )
     try:
         connection = mysql.connector.connect(
             host=DATABASE_HOST,
@@ -53,7 +62,7 @@ def create_database():
     This function connects to the MySQL server and creates a new database with the name specified
     in the DATABASE_NAME variable. If the database already exists, it does nothing.
     """
-
+    print(" baseeeeeeeeeeeeeeeeeeeeeeee", DATABASE_HOST, DATABASE_NAME)
     connection = None
     try:
         connection = mysql.connector.connect(
@@ -72,7 +81,7 @@ def create_database():
             connection.close()
 
 
-def init_db():
+def init_db_test():
     """
     Initializes the database.
 

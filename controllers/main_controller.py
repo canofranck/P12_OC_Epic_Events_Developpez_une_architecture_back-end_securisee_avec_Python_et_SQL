@@ -5,8 +5,11 @@ import models
 import controllers
 import views
 import sentry_sdk
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
+
+load_dotenv()
 
 
 class MainController:
@@ -148,14 +151,20 @@ class MainController:
                 raise ValueError(
                     "Role 'MANAGER' does not exist in the database."
                 )
+
+            admin_first_name = os.getenv("ADMIN_FIRST_NAME")
+            admin_last_name = os.getenv("ADMIN_LAST_NAME")
+            admin_email = os.getenv("ADMIN_EMAIL")
+            admin_phone = os.getenv("ADMIN_PHONE")
+            admin_password = os.getenv("ADMIN_PASSWORD")
             admin = models.User(
-                username="Admin",
-                full_name="Admin User",
-                email="admin@example.com",
-                phone_number="1234567890",
+                username=admin_first_name,
+                full_name=admin_last_name,
+                email=admin_email,
+                phone_number=admin_phone,
                 role_id=manager_role.id,
             )
-            admin.set_password("adminoc")
+            admin.set_password(admin_password)
             self.session.add(admin)
             self.session.commit()
 
@@ -192,8 +201,9 @@ class MainController:
         running = True
         while running:
             role_name = self.user.role.name
+            user_name = self.user.username
             menu_selection = self.user_controller.view.display_user_menu(
-                role_name
+                role_name, user_name
             )
 
             if menu_selection == "0":

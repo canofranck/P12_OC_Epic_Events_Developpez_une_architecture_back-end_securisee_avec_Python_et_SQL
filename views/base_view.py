@@ -10,10 +10,33 @@ else:
 
 
 class BaseView:
+    """
+    The BaseView class serves as the base class for all views in the application.
+
+    Attributes:
+        console: The console object used for displaying output.
+
+    Methods:
+        __init__(self, console):
+            Initializes the BaseView with the given console object.
+
+        wait_for_key_press(self):
+            Waits for the user to press a key before continuing.
+    """
+
     def __init__(self, console):
+        """
+        Initializes the BaseView with the given console object.
+
+        Args:
+            console: The console object used for displaying output.
+        """
         self.console = console
 
     def wait_for_key_press(self):
+        """
+        Waits for the user to press a key before continuing.
+        """
         print("Appuyez sur une touche pour continuer...")
         if os.name == "nt":
             msvcrt.getch()

@@ -11,7 +11,7 @@ ROLE_ADMIN = "ADMIN"
 MAIN_MENU_LOGIN = "1"
 MAIN_MENU_QUIT = "0"
 
-# User Menu commun
+# User Menu common
 
 LIST_CUSTOMERS = "1"
 LIST_CONTRACTS = "2"
@@ -74,3 +74,9 @@ ERR_USER_NOT_FOUND = "USER not found"
 ERR_USER_NO_ROLE = (
     "This USER has no role, he cannot interact with the application"
 )
+ERR_USER_BAD_PASSWORD = "Bad password. Please try again."
+
+ERR_TOO_MANY_ATTEMPTS_EMAIL = "too many attempts for email"
+ERR_TOO_MANY_ATTEMPTS_PASSWORD = "too many attempts for password"
+ERR_TOO_MANY_ATTEMPTS = "too many attempts, maybe a breakforce attack"
+ERR_NO_CONTRACT_FOR_CUSTOMER = "No contract for this customer"

@@ -6,7 +6,32 @@ from rich.table import Table
 
 
 class ContractView(views.BaseView):
+    """
+    The ContractView class is responsible for managing the contract-related views in the application.
+
+    Methods:
+        input_contract_management(self):
+            Displays the contract management menu and handles user input for selecting an action.
+
+        input_contract_amount(self):
+            Prompts the user to input the total amount for a contract.
+
+        input_contract_remaining_amount(self, remaining_amount, total_amount):
+            Prompts the user to input the new remaining amount to be paid on a contract.
+    """
+
     def input_contract_management(self):
+        """
+        Displays the contract management menu and handles user input for selecting an action.
+
+        This method presents the user with a menu of contract management options, including exiting the menu,
+        creating a new contract, and updating an existing contract. The user is prompted to select an action
+        by entering a number corresponding to the desired option. The method validates the user's input and
+        returns the selected action.
+
+        Returns:
+            int: The number corresponding to the selected action.
+        """
         self.console.print("[menu_choice]" + constantes.LOG_OUT + " - Exit[/]")
         self.console.print(
             "[menu_choice]"
@@ -30,10 +55,28 @@ class ContractView(views.BaseView):
         return selection
 
     def input_contract_amount(self):
+        """
+        Prompts the user to input the total amount for a contract.
+
+        This method displays a message asking the user to input the total amount for a contract. The user's input
+        is returned as a string.
+
+        Returns:
+            str: The total amount for the contract.
+        """
         self.console.print("Total amount : ", style="input")
         return input()
 
     def input_contract_remaining_amount(self, remaining_amount, total_amount):
+        """
+        Prompts the user to input the new remaining amount to be paid on a contract.
+
+        This method displays a message asking the user to input the new remaining amount to be paid on a contract.
+        The user's input is returned as an integer.
+
+        Returns:
+            int: The new remaining amount to be paid on a contract.
+        """
         self.console.print(
             f"[menu_text]remaining on bill: {remaining_amount}[/]"
         )
@@ -59,7 +102,15 @@ class ContractView(views.BaseView):
         return new_remaining_amount
 
     def input_contract_signed(self):
+        """
+        Prompts the user to input if the contract is already signed.
 
+        This method displays a message asking the user to input if the contract is already signed. The user's input
+        is returned as a boolean.
+
+        Returns:
+            bool: True if the contract is signed, False otherwise.
+        """
         int_signed = -1
         while int_signed == -1:
             self.console.print(
@@ -77,6 +128,15 @@ class ContractView(views.BaseView):
         return True
 
     def input_new_contract(self):
+        """
+        Prompts the user to input the total amount and if the contract is already signed.
+
+        This method displays a message asking the user to input the total amount for a contract. The user's input
+        is returned as a string.
+
+        Returns:
+            str: The total amount for the contract.
+        """
         total_amount_input = self.input_contract_amount()
         is_signed_input = self.input_contract_signed()
         return {
@@ -104,6 +164,16 @@ class ContractView(views.BaseView):
         self.wait_for_key_press()
 
     def input_list_contracts_filters(self):
+        """
+        Displays the list contracts filters menu and handles user input for selecting a filter.
+
+        This method presents the user with a menu of list contracts filters options, including no filters, contracts not signed, and contracts not totally paid. The user is prompted to select a filter
+        by entering a number corresponding to the desired option. The method validates the user's input and
+        returns the selected filter.
+
+        Returns:
+            int: The number corresponding to the selected filter.
+        """
         self.console.print(
             Panel("--   List contracts Filters   --", expand=True),
             style="menu_text",
@@ -140,17 +210,29 @@ class ContractView(views.BaseView):
         return str(list_contract_filter)
 
     def display_new_contract_validation(self):
+        """
+        Displays a success message indicating that a new contract has been created.
+        """
         self.console.print("[success]Contract successfully created[/]")
         self.wait_for_key_press()
 
     def display_update_contract_validation(self):
+        """
+        Displays a success message indicating that a contract has been updated.
+        """
         self.console.print("[success]Contract successfully updated[/]")
         self.wait_for_key_press()
 
     def display_no_contract_found(self):
+        """
+        Displays an error message indicating that no contract was found.
+        """
         return self.console.print("[error]No contract found[/]")
 
     def display_new_contract(self):
+        """
+        Displays a panel indicating that a new contract is being created.
+        """
         self.console.print(
             Panel("---   New Contract management   ---", expand=True),
             style="menu_text",

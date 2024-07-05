@@ -1,3 +1,4 @@
+from controllers import main_controller
 import models
 import bcrypt
 import constantes
@@ -103,7 +104,9 @@ class UserController:
         views.MainView.clear_screen(self)
         self.view.login_menu()
 
-        while True:
+        email_attempts = 0
+        max_email_attempts = 3
+        while email_attempts < max_email_attempts:
             email = self.view.input_email()
             token = self.load_token(email)
             if token and self.is_token_valid(token):
@@ -115,17 +118,45 @@ class UserController:
                 self.session.query(models.User).filter_by(email=email).first()
             )
             if user is None:
-                print(constantes.ERR_USER_NOT_FOUND)
-                continue
+                email_attempts += 1
+                if email_attempts >= max_email_attempts:
+                    self.view.display_error(
+                        constantes.ERR_TOO_MANY_ATTEMPTS_EMAIL
+                    )
 
-            while True:
+                    break
+
+                else:
+                    self.view.display_error(constantes.ERR_USER_NOT_FOUND)
+
+                    continue
+
+            password_attempts = 0
+            max_password_attempts = 3
+            while password_attempts < max_password_attempts:
                 password = self.view.input_password()
                 if not self.is_password_correct(password, user):
-                    print("Bad password. Please try again.")
-                    continue
+                    password_attempts += 1
+                    if password_attempts >= max_password_attempts:
+                        self.view.display_error(
+                            constantes.ERR_TOO_MANY_ATTEMPTS_PASSWORD
+                        )
+                        email_attempts = max_email_attempts
+
+                        break
+
+                    else:
+                        self.view.display_error(
+                            constantes.ERR_USER_BAD_PASSWORD
+                        )
+                        print(password_attempts)
+                        continue
+
                 self.user = user
                 self.save_token(self.generate_token(user), email)
                 return user
+        self.view.display_error(constantes.ERR_TOO_MANY_ATTEMPTS)
+        raise ValueError(constantes.ERR_TOO_MANY_ATTEMPTS)
 
     def manage_user(self):
         """
@@ -154,7 +185,7 @@ class UserController:
                 self.delete_user()
             case _:
                 print("input invalide")
-                self.create_user()
+
         return
 
     def create_user(self):
@@ -183,7 +214,7 @@ class UserController:
             return self.view.display_new_user_validation()
         except Exception as err:
             self.session.rollback()
-            return print("error", err)
+            return self.view.display_new_user_error()
 
     def set_new_user_email(self):
         """
@@ -324,9 +355,8 @@ class UserController:
         email = self.view.input_email()
         user = self.session.query(models.User).filter_by(email=email).first()
 
-        print("sql user", user)
         if user is None:
-            print("user NOTFOUND")
+            raise ValueError(constantes.ERR_USER_NOT_FOUND)
         return user
 
     def is_password_correct(self, input_password, user):

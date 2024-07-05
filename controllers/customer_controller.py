@@ -218,7 +218,7 @@ class CustomerController:
             self.session.query(models.Customer).filter_by(**filters).first()
         )
         if customer is None:
-            raise ValueError("CUSTOMER_NOT_FOUND")
+            raise ValueError("NO CONTRACT FOR THIS CUSTOMER")
         return customer
 
     def list_customers(self):
