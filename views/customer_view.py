@@ -124,33 +124,36 @@ class CustomerView(views.BaseView):
         self.console.print("[success]New customer correctly created[/]")
         self.wait_for_key_press()
 
-    def display_customer_information(self, customer: models.Customer):
+    def display_customer_information(self, customers: models.Customer):
         """
         Displays the information of a customer.
 
         Args:
             customer (models.Customer): The customer object to display.
         """
-        self.console.print(
-            Panel("---   LIST CUSTOMERS   ---", expand=True),
-            style="menu_text",
-        )
-        table = Table(
-            title=f" Client: {customer.first_name} {customer.last_name}"
-        )
 
-        table.add_column("Champ", justify="left", style="cyan", no_wrap=True)
-        table.add_column("Valeur", justify="left", style="cyan", no_wrap=True)
+        table = Table(title="Listing clients")
+        table.add_column("First name")
+        table.add_column("Last name")
+        table.add_column("Phone number")
+        table.add_column("Email")
+        table.add_column("Company name")
+        table.add_column("Commercial contact")
+        table.add_column("Creation date")
+        table.add_column("Last contact")
 
-        table.add_row("First name", customer.first_name)
-        table.add_row("Last name", customer.last_name)
-        table.add_row("Phone number", customer.phone_number)
-        table.add_row("Email", customer.email)
-        table.add_row("Company name", customer.compagny_name)
-        table.add_row("Commercial contact", customer.user.full_name)
-        table.add_row("Creation date", str(customer.creation_date))
-        table.add_row("Last contact", str(customer.last_contact_date))
-
+        for customer in customers:
+            table.add_row(
+                customer.first_name,
+                customer.last_name,
+                customer.phone_number,
+                customer.email,
+                customer.compagny_name,
+                customer.user.full_name,
+                str(customer.creation_date),
+                str(customer.last_contact_date),
+            )
+        table.column_widths = "auto"
         self.console.print(table)
         self.wait_for_key_press()
 
@@ -182,5 +185,11 @@ class CustomerView(views.BaseView):
         """
         Displays a success message indicating that a customer has been updated.
         """
-        print("Customer successfully updated", style="success")
+        self.console.print("Customer successfully updated", style="success")
         self.wait_for_key_press()
+
+    def display_customer_not_found(self):
+        """
+        Displays a message indicating that a customer was not found.
+        """
+        self.console.print("Customer not found", style="error")

@@ -230,12 +230,10 @@ class ContractController:
 
         if filters:
             contracts = (
-                self.session.query(models.Contract)
-                .filter(and_(*filters))
-                .all()
+                self.session.query(models.Contract).filter(*filters).all()
             )
         else:
             contracts = self.session.query(models.Contract).all()
-
-        for contract in contracts:
-            self.view.display_contract_informations(contract)
+        if len(contracts) == 0:
+            return self.view.display_no_contract_found()
+        self.view.display_contract_informations(contracts)

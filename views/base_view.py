@@ -40,7 +40,7 @@ class BaseView:
         print("Appuyez sur une touche pour continuer...")
         if os.name == "nt":
             msvcrt.getch()
-            # views.MainView.clear_screen(self)
+            views.MainView.clear_screen(self)
         else:
             fd = sys.stdin.fileno()
             old_settings = termios.tcgetattr(fd)

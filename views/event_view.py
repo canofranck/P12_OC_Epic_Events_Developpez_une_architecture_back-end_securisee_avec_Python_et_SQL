@@ -69,7 +69,7 @@ class EventView(views.BaseView):
         self.console.print("Event notes : ", style="input")
         return input()
 
-    def display_event(self, event: models.Event):
+    def display_event(self, events: models.Event, table):
         """
         Displays the details of an event.
 
@@ -80,25 +80,9 @@ class EventView(views.BaseView):
         Args:
             event (models.Event): The event object containing the details to be displayed.
         """
-        table = Table(title=f"Liste des events")
-        table.add_column("Champ", justify="left", style="cyan", no_wrap=True)
-        table.add_column("Valeur", justify="left", style="cyan", no_wrap=True)
-        table.add_row("Event Name", f"{event.event_name}")
-        table.add_row("Event ID", f"{event.id}")
-        table.add_row("Contract ID", f"{event.contract_id}")
-        if event.customer_name is not None:
-            table.add_row("Customer Name", f"{event.customer_name}")
-        table.add_row("Sales Contact", f"{event.customer_contact}")
-        table.add_row("Event Start Date", f"{event.start_date}")
-        table.add_row("Event End Date", f"{event.end_date}")
-        table.add_row("Event Location", f"{event.location}")
-        table.add_row("Number of attendees", f"{event.nb_attendees}")
-        table.add_row("Event Notes", f"{event.notes}")
-        if event.user is not None:
-            table.add_row("Support", f"{event.user.email}")
 
+        table.column_widths = "auto"
         self.console.print(table)
-        self.wait_for_key_press()
 
     def display_new_event_panel(self):
         """
@@ -310,3 +294,9 @@ class EventView(views.BaseView):
             Panel("---   Support Events management   ---", expand=True),
             style="menu_text",
         )
+
+    def display_no_events_found(self):
+        """
+        Displays a message indicating that no events were found.
+        """
+        self.console.print("[error]No events found.[/]")

@@ -236,30 +236,9 @@ class CustomerController:
         logger.debug("Début de la méthode list_customers")
         customers = self.session.query(models.Customer).all()
         if len(customers) == 0:
-            return print(" Customer not found")
+            return self.view.display_customer_not_found()
 
-        table = Table(title="Liste des Clients")
-        table.add_column("Prénom", justify="left", style="input", no_wrap=True)
-        table.add_column("Nom", justify="left", style="input", no_wrap=True)
-        table.add_column("Email", justify="left", style="input", no_wrap=True)
-        table.add_column(
-            "Téléphone", justify="left", style="input", no_wrap=True
-        )
-        table.add_column(
-            "Nom de l'entreprise", justify="left", style="input", no_wrap=True
-        )
-        table.add_column(
-            "ID de vente", justify="left", style="input", no_wrap=True
-        )
+        self.view.display_customer_information(customers)
 
-        for customer in customers:
-            table.add_row(
-                customer.first_name,
-                customer.last_name,
-                customer.email,
-                customer.phone_number,
-                customer.compagny_name,
-                str(customer.sales_id),
-            )
-        for customer in customers:
-            self.view.display_customer_information(customer)
+        # for customer in customers:
+        #     self.view.display_customer_information(customer)

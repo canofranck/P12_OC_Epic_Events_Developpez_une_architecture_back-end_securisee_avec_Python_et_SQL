@@ -80,3 +80,7 @@ ERR_TOO_MANY_ATTEMPTS_EMAIL = "too many attempts for email"
 ERR_TOO_MANY_ATTEMPTS_PASSWORD = "too many attempts for password"
 ERR_TOO_MANY_ATTEMPTS = "too many attempts, maybe a breakforce attack"
 ERR_NO_CONTRACT_FOR_CUSTOMER = "No contract for this customer"
+
+TOKEN_VALIDITY_PERIOD = 1
+MAX_EMAIL_ATTEMPS = 3
+MAX_PASSWORD_ATTEMPS = 3

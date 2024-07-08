@@ -7,6 +7,9 @@ import jwt
 import os
 from datetime import datetime, timedelta
 import views
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class UserController:
@@ -102,18 +105,17 @@ class UserController:
             user: The logged-in user.
         """
         views.MainView.clear_screen(self)
+        token = self.load_token()
+        if token and self.is_token_valid(token):
+            self.user = self.get_user_from_token(token)
+            if self.user:
+                return self.user
         self.view.login_menu()
 
         email_attempts = 0
-        max_email_attempts = 3
+        max_email_attempts = constantes.MAX_EMAIL_ATTEMPS
         while email_attempts < max_email_attempts:
             email = self.view.input_email()
-            token = self.load_token(email)
-            if token and self.is_token_valid(token):
-                self.user = self.get_user_from_token(token)
-                if self.user:
-                    return self.user
-
             user = (
                 self.session.query(models.User).filter_by(email=email).first()
             )
@@ -132,7 +134,7 @@ class UserController:
                     continue
 
             password_attempts = 0
-            max_password_attempts = 3
+            max_password_attempts = constantes.MAX_PASSWORD_ATTEMPS
             while password_attempts < max_password_attempts:
                 password = self.view.input_password()
                 if not self.is_password_correct(password, user):
@@ -149,11 +151,11 @@ class UserController:
                         self.view.display_error(
                             constantes.ERR_USER_BAD_PASSWORD
                         )
-                        print(password_attempts)
+
                         continue
 
                 self.user = user
-                self.save_token(self.generate_token(user), email)
+                self.save_token(self.generate_token(user))
                 return user
         self.view.display_error(constantes.ERR_TOO_MANY_ATTEMPTS)
         raise ValueError(constantes.ERR_TOO_MANY_ATTEMPTS)
@@ -199,6 +201,7 @@ class UserController:
         Returns:
             None
         """
+
         self.view.display_new_user_panel()
         new_user = models.User(
             email=self.set_new_user_email(),
@@ -211,8 +214,16 @@ class UserController:
         try:
             self.session.add(new_user)
             self.session.commit()
+            logger.info(
+                "User : " + new_user.full_name + " created with success "
+            )
+
             return self.view.display_new_user_validation()
         except Exception as err:
+            logger.info(
+                "User : " + new_user.full_name + " not created",
+            )
+
             self.session.rollback()
             return self.view.display_new_user_error()
 
@@ -307,6 +318,7 @@ class UserController:
         Returns:
             None
         """
+
         self.view.display_update_user()
         try:
             user = self.get_user()
@@ -319,6 +331,7 @@ class UserController:
             user.phone_number = update_user_input["phone_number"]
             user.role_id = update_user_input["role_id"]
             self.session.commit()
+            logger.info("Update user " + user.full_name + " success")
             return self.view.display_update_user_validation()
         except ValueError as err:
             print("error", err)
@@ -387,38 +400,39 @@ class UserController:
         Returns:
             token: The generated JWT token.
         """
+        token_validity_period = constantes.TOKEN_VALIDITY_PERIOD
+
         payload = {
             "user_id": user.id,
-            "exp": datetime.utcnow()
-            + timedelta(hours=1),  # Token valid for 1 hour
+            "exp": datetime.utcnow() + timedelta(hours=token_validity_period),
         }
         return jwt.encode(payload, self.secret_key, algorithm="HS256")
 
-    def save_token(self, token, email):
+    def save_token(self, token):
         """
         Saves the JWT token for the user to a file.
 
-        This method saves the JWT token for the user to a file named token_{email}.txt.
+        This method saves the JWT token for the user to a file named token.txt.
         It opens the file in write mode and writes the token to it.
 
         Returns:
             None
         """
-        filename = f"token_{email}.txt"
+        filename = f"token.txt"
         with open(filename, "w") as file:
             file.write(token)
 
-    def load_token(self, email):
+    def load_token(self):
         """
         Loads the JWT token for the user from a file.
 
-        This method loads the JWT token for the user from a file named token_{email}.txt.
+        This method loads the JWT token for the user from a file named token.txt.
         If the file exists, it reads the token from the file and returns it. Otherwise, it returns None.
 
         Returns:
             token: The loaded JWT token.
         """
-        filename = f"token_{email}.txt"
+        filename = f"token.txt"
         if os.path.exists(filename):
             with open(filename, "r") as file:
                 return file.read()

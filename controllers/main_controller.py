@@ -103,6 +103,7 @@ class MainController:
             try:
                 choice = self.view.display_main_menu()
                 logger.debug("Choix de l'utilisateur : %s", choice)
+                logger.info("Choix de l'utilisateur logger info : %s", choice)
                 if choice == constantes.MAIN_MENU_LOGIN:
                     user = self.user_controller.run_login_menu()
                     self.set_user_to_controllers(user)
@@ -446,8 +447,8 @@ class MainController:
             sentry_sdk.flush()
             exit()
         # delete token
-        email = self.user.email
-        filename = f"token_{email}.txt"
+
+        filename = f"token.txt"
         if os.path.exists(filename):
             os.remove(filename)
         # clear session

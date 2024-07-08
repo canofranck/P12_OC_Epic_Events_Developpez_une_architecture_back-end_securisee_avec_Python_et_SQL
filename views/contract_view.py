@@ -144,22 +144,28 @@ class ContractView(views.BaseView):
             "is_signed": is_signed_input,
         }
 
-    def display_contract_informations(self, contract: models.Contract):
-        table = Table(title=f"Liste Contrat")
-        table.add_column("Champ", justify="left", style="cyan", no_wrap=True)
-        table.add_column("Valeur", justify="left", style="cyan", no_wrap=True)
-        table.add_row("Client First Name", f"{contract.customer.first_name}")
-        table.add_row("Client Last Name", f"{contract.customer.last_name}")
-        table.add_row(
-            "Commercial Contact Username", f"{contract.customer.user.username}"
-        )
+    def display_contract_informations(self, contracts: models.Contract):
 
-        table.add_row(
-            "Commercial contact Fullname", f"{contract.user.full_name}"
-        )
-        table.add_row("Is signed", f"{contract.is_signed}")
-        table.add_row("Remaining amount", f"{contract.remaining_amount}")
-        table.add_row("Creation date", f"{contract.creation_date}")
+        table = Table(title="Liste Contrat")
+
+        table.add_column("Client First Name")
+        table.add_column("Client Last Name")
+        table.add_column("Commercial Contact Username")
+        table.add_column("Commercial contact Fullname")
+        table.add_column("Is signed")
+        table.add_column("Remaining amount")
+        table.add_column("Creation date")
+        for contract in contracts:
+            table.add_row(
+                contract.customer.first_name,
+                contract.customer.last_name,
+                contract.customer.user.username,
+                contract.user.full_name,
+                "Yes" if contract.is_signed else "No",
+                "{:.2f}".format(contract.remaining_amount),
+                str(contract.creation_date),
+            )
+        table.column_widths = "auto"
         self.console.print(table)
         self.wait_for_key_press()
 

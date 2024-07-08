@@ -4,7 +4,7 @@ import models
 import models.user
 
 import os
-import themes
+import views.themes
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 import logging
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     session = init_db()
 
     main_controller = MainController(
-        session, salt, secret_key, console=themes.theme_console()
+        session, salt, secret_key, console=views.themes.theme_console()
     )
 
     try:

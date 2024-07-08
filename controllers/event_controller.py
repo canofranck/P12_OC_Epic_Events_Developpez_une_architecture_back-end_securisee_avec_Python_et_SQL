@@ -227,23 +227,51 @@ class EventController:
             # If no filter is selected, display all events
             events = self.session.query(models.Event).all()
 
-        for event in events:
-            table = Table(title=f"Liste des events")
-            table.add_column(
-                "Champ", justify="left", style="cyan", no_wrap=True
+        if len(events) == 0:
+            return self.view.display_no_events_found()
+        table = Table(title="Liste des events")
+
+        table.add_column("Event Name")
+        table.add_column("Event ID")
+        table.add_column("Contract ID")
+
+        table.add_column("Customer Name")
+        table.add_column("Sales Contact")
+        table.add_column("Event Start Date")
+        table.add_column("Event End Date")
+        table.add_column("Event Location")
+        table.add_column("Number of attendees")
+        table.add_column("Event Notes")
+        table.add_column("Support")
+        for event_item in events:
+            support_email = event_item.user.email if event_item.user else ""
+            manager_id = (
+                self.session.query(models.Contract.manager_id)
+                .filter(models.Contract.id == event_item.contract_id)
+                .scalar()
             )
-            table.add_column(
-                "Valeur", justify="left", style="cyan", no_wrap=True
+            sales_contact_name = (
+                self.session.query(models.User.full_name)
+                .filter(models.User.id == manager_id)
+                .scalar()
+                if manager_id
+                else ""
             )
-            table.add_row("Event Name ", f"{event.event_name}")
-            table.add_row("Customer Name", f"{event.customer_name}")
-            table.add_row("Customer Contact", f"{event.customer_contact}")
-            table.add_row("Start Date", f"{event.start_date}")
-            table.add_row("End Date", f"{event.end_date}")
-            table.add_row("Location", f"{event.location}")
-            table.add_row("Number of attendees", f"{event.nb_attendees}")
-            table.add_row("Notes", f"{event.notes}")
-            self.view.display_event(event)
+            table.add_row(
+                event_item.event_name,
+                str(event_item.id),
+                str(event_item.contract_id),
+                event_item.customer_name,
+                sales_contact_name,
+                str(event_item.start_date),
+                str(event_item.end_date),
+                event_item.location,
+                str(event_item.nb_attendees),
+                event_item.notes,
+                support_email,
+            )
+            self.view.display_event(events, table)
+        views.BaseView.wait_for_key_press(self)
 
     def sales_manager_events(self, support_user=None, assigned_support=None):
         """
