@@ -442,4 +442,4 @@ class UserView(views.BaseView):
         """
         Displays an error message.
         """
-        self.console.print(f"[error] {message} [/]")
+        self.console.print(f"[error]  {message} ")

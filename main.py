@@ -54,15 +54,11 @@ if __name__ == "__main__":
     )
 
     try:
-
-        logger.debug("Starting admin creation and running the main controller")
-
         main_controller.create_admin()
         main_controller.run()
-        logger.debug("Program stopped")
     except Exception as e:
         sentry_sdk.capture_exception(e)
-        logger.error("An error occurred: %s", e)
+        logger.info("Error exception : " + str(e))
     finally:
         sentry_sdk.flush()
         session.close()

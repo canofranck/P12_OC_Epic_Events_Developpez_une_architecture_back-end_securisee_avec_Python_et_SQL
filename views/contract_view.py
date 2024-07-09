@@ -155,7 +155,10 @@ class ContractView(views.BaseView):
         table.add_column("Is signed")
         table.add_column("Remaining amount")
         table.add_column("Creation date")
-        for contract in contracts:
+        try:
+            iter(contracts)
+        except TypeError:
+            contract = contracts
             table.add_row(
                 contract.customer.first_name,
                 contract.customer.last_name,
@@ -165,9 +168,23 @@ class ContractView(views.BaseView):
                 "{:.2f}".format(contract.remaining_amount),
                 str(contract.creation_date),
             )
-        table.column_widths = "auto"
-        self.console.print(table)
-        self.wait_for_key_press()
+            table.column_widths = "auto"
+            self.console.print(table)
+
+        else:
+            for contract in contracts:
+                table.add_row(
+                    contract.customer.first_name,
+                    contract.customer.last_name,
+                    contract.customer.user.username,
+                    contract.user.full_name,
+                    "Yes" if contract.is_signed else "No",
+                    "{:.2f}".format(contract.remaining_amount),
+                    str(contract.creation_date),
+                )
+            table.column_widths = "auto"
+            self.console.print(table)
+            self.wait_for_key_press()
 
     def input_list_contracts_filters(self):
         """
@@ -233,7 +250,8 @@ class ContractView(views.BaseView):
         """
         Displays an error message indicating that no contract was found.
         """
-        return self.console.print("[error]No contract found[/]")
+        self.console.print("[error]No contract found[/]")
+        return self.wait_for_key_press()
 
     def display_new_contract(self):
         """
@@ -243,3 +261,9 @@ class ContractView(views.BaseView):
             Panel("---   New Contract management   ---", expand=True),
             style="menu_text",
         )
+
+    def display_error(self, message):
+        """
+        Displays an error message.
+        """
+        self.console.print(f"[error] {message} [/]")

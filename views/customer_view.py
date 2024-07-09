@@ -141,8 +141,11 @@ class CustomerView(views.BaseView):
         table.add_column("Commercial contact")
         table.add_column("Creation date")
         table.add_column("Last contact")
-
-        for customer in customers:
+        try:
+            iter(customers)
+        except TypeError:
+            # Si customers n'est pas itérable, considérez-le comme un seul objet
+            customer = customers
             table.add_row(
                 customer.first_name,
                 customer.last_name,
@@ -153,9 +156,25 @@ class CustomerView(views.BaseView):
                 str(customer.creation_date),
                 str(customer.last_contact_date),
             )
-        table.column_widths = "auto"
-        self.console.print(table)
-        self.wait_for_key_press()
+            table.column_widths = "auto"
+            self.console.print(table)
+
+        else:
+            # customers est itérable
+            for customer in customers:
+                table.add_row(
+                    customer.first_name,
+                    customer.last_name,
+                    customer.phone_number,
+                    customer.email,
+                    customer.compagny_name,
+                    customer.user.full_name,
+                    str(customer.creation_date),
+                    str(customer.last_contact_date),
+                )
+            table.column_widths = "auto"
+            self.console.print(table)
+            self.wait_for_key_press()
 
     def input_update_customer(self):
         """
@@ -193,3 +212,18 @@ class CustomerView(views.BaseView):
         Displays a message indicating that a customer was not found.
         """
         self.console.print("Customer not found", style="error")
+
+    def display_not_your_customer(self):
+        """
+        Displays a message indicating that a customer was not found.
+        """
+        self.console.print(
+            "the customer contract is not assigned to you", style="error"
+        )
+        self.wait_for_key_press()
+
+    def display_error(self, message):
+        """
+        Displays an error message.
+        """
+        self.console.print(f"[error] {message} [/]")

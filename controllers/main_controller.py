@@ -102,35 +102,28 @@ class MainController:
         while True:
             try:
                 choice = self.view.display_main_menu()
-                logger.debug("Choix de l'utilisateur : %s", choice)
-                logger.info("Choix de l'utilisateur logger info : %s", choice)
+
                 if choice == constantes.MAIN_MENU_LOGIN:
                     user = self.user_controller.run_login_menu()
                     self.set_user_to_controllers(user)
                     self.view.clear_screen()
                     self.view.input_welcome_user(user)
-                    logger.debug(
-                        "Utilisateur connecté avec succès : ", user.username
-                    )
                     self.get_user_main_menu()
 
                 elif choice == constantes.MAIN_MENU_QUIT:
-                    logger.debug(
-                        "L'utilisateur a choisi de quitter l'application."
+                    self.view.display_error(
+                        constantes.MAIN_CONTROLLER_ERR_QUIT
                     )
-                    print("Au revoir !")
                     break
                 else:
                     self.view.display_invalid_option_message()
-                    logger.debug(
-                        "Option invalide sélectionnée dans le menu principal."
-                    )
+
             except Exception as e:
                 sentry_sdk.capture_exception(e)
-                logger.error("Une erreur est survenue : %s", e)
-                print(
-                    "Une erreur est survenue. Veuillez consulter les logs pour plus de détails."
+                self.view.display_error(
+                    f"Une erreur est survenue. Veuillez consulter les logs pour plus de détails. {e}"
                 )
+                logger.info("Error exception : " + str(e))
 
     def create_admin(self):
         """
@@ -219,7 +212,9 @@ class MainController:
                 case constantes.ROLE_ADMIN:
                     self.process_admin_action(menu_selection)
                 case _:
-                    print("input invalide")
+                    self.view.display_error(
+                        constantes.MAIN_CONTROLLER_ERR_INPUT
+                    )
                     running = False
                     continue
 
@@ -259,7 +254,7 @@ class MainController:
                 self.view.clear_screen()
                 self.manage_contract()
             case _:
-                print("input invalide")
+                self.view.display_error(constantes.MAIN_CONTROLLER_ERR_INPUT)
 
     def process_sales_action(self, menu_selection):
         """
@@ -300,7 +295,7 @@ class MainController:
                 self.create_event_sales()
 
             case _:
-                print("input invalide")
+                self.view.display_error(constantes.MAIN_CONTROLLER_ERR_INPUT)
 
     def process_support_action(self, menu_selection):
         """
@@ -329,7 +324,7 @@ class MainController:
                     assigned_support=self.user,
                 )
             case _:
-                print("input invalide")
+                self.view.display_error(constantes.MAIN_CONTROLLER_ERR_INPUT)
 
     def manage_contract(self):
         """
@@ -350,7 +345,8 @@ class MainController:
                 customer_to_manage
             )
         except ValueError as err:
-            print("error", err)
+            self.view.display_error(f"error : {err}")
+            logger.info("ValueError : " + str(err))
 
     def update_customer_contract_sales(self):
         """
@@ -370,7 +366,8 @@ class MainController:
             )
             self.contract_controller.update_contract(customer_to_manage)
         except ValueError as err:
-            print("error", err)
+            self.view.display_error(f"error : {err}")
+            logger.info("ValueError : " + str(err))
 
     def create_event_sales(self):
         """
@@ -393,13 +390,14 @@ class MainController:
                 customer_to_manage
             )
             if not contract_to_manage:
-                print("Aucun contrat trouvé pour ce client.")
+
                 return
             return self.event_controller.create_event(
                 customer_to_manage, contract_to_manage
             )
         except ValueError as err:
-            print("error", err)
+            self.view.display_error(f"error : {err}")
+            logger.info("ValueError : " + str(err))
 
     def set_support_on_event(self):
         """
@@ -428,7 +426,9 @@ class MainController:
                 assigned_support=None,
             )
         except ValueError as err:
-            return print("error", err)
+            self.view.display_error(f"error : {err}")
+            logger.info("ValueError : " + str(err))
+            return
 
     def logout(self):
         """

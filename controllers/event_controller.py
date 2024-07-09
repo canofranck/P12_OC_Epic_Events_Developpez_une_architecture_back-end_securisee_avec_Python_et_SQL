@@ -4,6 +4,10 @@ import views
 from datetime import datetime
 import validators
 from rich.table import Table
+import logging
+import constantes
+
+logger = logging.getLogger(__name__)
 
 
 class EventController:
@@ -89,7 +93,9 @@ class EventController:
             return self.view.display_new_event_validation()
         except Exception as err:
             self.session.rollback()
-            return print("error", err)
+            self.view.display_error(f"Error Exception : {err}")
+            logger.info("Error Exception " + err)
+            return
 
     def update_event(self, support_user=None, assigned_support=None):
         """
@@ -103,11 +109,54 @@ class EventController:
             A message indicating the success or failure of the event update.
         """
         if support_user is not None and assigned_support is not None:
-            return print("A USER SUPPORT IS ALREADY DEFINE")
+            return self.view.display_error(
+                constantes.EVENT_CONTROLLER_SUPPORT_ALREADY_DEFINE
+            )
 
         try:
             event_to_update = self.get_event(assigned_support)
-            self.view.display_event(event_to_update)
+            table = Table(title="Liste des events")
+            table.add_column("Event Name")
+            table.add_column("Event ID")
+            table.add_column("Contract ID")
+            table.add_column("Customer Name")
+            table.add_column("Sales Contact")
+            table.add_column("Event Start Date")
+            table.add_column("Event End Date")
+            table.add_column("Event Location")
+            table.add_column("Number of attendees")
+            table.add_column("Event Notes")
+            table.add_column("Support")
+            support_email = (
+                event_to_update.user.email if event_to_update.user else ""
+            )
+            manager_id = (
+                self.session.query(models.Contract.manager_id)
+                .filter(models.Contract.id == event_to_update.contract_id)
+                .scalar()
+            )
+            sales_contact_name = (
+                self.session.query(models.User.full_name)
+                .filter(models.User.id == manager_id)
+                .scalar()
+                if manager_id
+                else ""
+            )
+            table.add_row(
+                event_to_update.event_name,
+                str(event_to_update.id),
+                str(event_to_update.contract_id),
+                event_to_update.customer_name,
+                sales_contact_name,
+                str(event_to_update.start_date),
+                str(event_to_update.end_date),
+                event_to_update.location,
+                str(event_to_update.nb_attendees),
+                event_to_update.notes,
+                support_email,
+            )
+            self.view.display_event(event_to_update, table)
+
             if support_user is not None:
                 event_to_update.user = support_user
             else:
@@ -123,7 +172,8 @@ class EventController:
             self.session.commit()
             return self.view.display_update_event_validation()
         except ValueError as err:
-            print("error", err)
+            self.view.display_error(f"ValueError : {err}")
+            logger.info("ValueError " + err)
 
     def set_new_event(self):
         """
@@ -142,7 +192,8 @@ class EventController:
                 validators.validate_date(start_date, end_date)
                 continue
             except ValueError as err:
-                print("error", err)
+                self.view.display_error(f"ValueError : {err}")
+                logger.info("ValueError " + err)
                 start_date = None
                 end_date = None
                 continue
@@ -169,7 +220,8 @@ class EventController:
                 new_date = datetime.strptime(new_date_input, date_format)
                 continue
             except ValueError as err:
-                print("error", err)
+                self.view.display_error(f"ValueError : {err}")
+                logger.info("ValueError " + err)
                 continue
         return new_date
 
@@ -189,7 +241,9 @@ class EventController:
             filters["user"] = assigned_support
         event = self.session.query(models.Event).filter_by(**filters).first()
         if event is None:
-            raise ValueError("EVENT_NOT_FOUND")
+            self.view.display_error(
+                constantes.EVENT_CONTROLLER_EVENT_NOT_FOUND
+            )
         return event
 
     def list_events(self):
@@ -203,7 +257,7 @@ class EventController:
         filters = []
         if event_filters_input == 1:
 
-            filters.append(True)
+            filters = []
         elif event_filters_input == 2:
             # Filter events of the user
             filters.append(
@@ -215,10 +269,7 @@ class EventController:
         elif event_filters_input == 3:
             # Filter events that the user manages and events without support
             filters.append(
-                or_(
-                    models.Event.support_id == self.user.id,
-                    models.Event.support_id == None,
-                )
+                models.Event.support_id == None,
             )
 
         if filters:
@@ -230,11 +281,9 @@ class EventController:
         if len(events) == 0:
             return self.view.display_no_events_found()
         table = Table(title="Liste des events")
-
         table.add_column("Event Name")
         table.add_column("Event ID")
         table.add_column("Contract ID")
-
         table.add_column("Customer Name")
         table.add_column("Sales Contact")
         table.add_column("Event Start Date")
@@ -244,6 +293,7 @@ class EventController:
         table.add_column("Event Notes")
         table.add_column("Support")
         for event_item in events:
+
             support_email = event_item.user.email if event_item.user else ""
             manager_id = (
                 self.session.query(models.Contract.manager_id)
@@ -270,7 +320,7 @@ class EventController:
                 event_item.notes,
                 support_email,
             )
-            self.view.display_event(events, table)
+        self.view.display_event(events, table)
         views.BaseView.wait_for_key_press(self)
 
     def sales_manager_events(self, support_user=None, assigned_support=None):

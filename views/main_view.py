@@ -158,3 +158,9 @@ class MainView(views.BaseView):
             "Do you want to logout and keep credentials  Yes or No?"
         )
         return input()
+
+    def display_error(self, message):
+        """
+        Displays an error message.
+        """
+        self.console.print(f"[error] {message} [/]")

@@ -4,6 +4,9 @@ from datetime import datetime
 from sqlalchemy import and_
 import constantes
 from rich.table import Table
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class ContractController:
@@ -60,34 +63,6 @@ class ContractController:
         """
         contract_to_manage = self.get_contract(customer)
         if contract_to_manage is not None:
-            table = Table(title="Liste Contrat")
-            table.add_column(
-                "First name:", justify="left", style="input", no_wrap=True
-            )
-            table.add_column(
-                "Last name:", justify="left", style="input", no_wrap=True
-            )
-            table.add_column(
-                "Contact:", justify="left", style="input", no_wrap=True
-            )
-            table.add_column(
-                "Username:", justify="left", style="input", no_wrap=True
-            )
-            table.add_column(
-                "Fullname:", justify="left", style="input", no_wrap=True
-            )
-            table.add_column(
-                "Is signed:", justify="left", style="input", no_wrap=True
-            )
-            table.add_column(
-                "Remaining amount:",
-                justify="left",
-                style="input",
-                no_wrap=True,
-            )
-            table.add_column(
-                "Creation date:", justify="left", style="input", no_wrap=True
-            )
             self.view.display_contract_informations(contract_to_manage)
 
         menu_selection = self.view.input_contract_management()
@@ -99,7 +74,7 @@ class ContractController:
             case 2:
                 return self.update_contract(customer)
             case _:
-                print("BAD MENU INPUT")
+                self.view.display_error(constantes.MAIN_CONTROLLER_ERR_INPUT)
 
     def create_contract(self, customer: models.Customer):
         """
@@ -132,6 +107,8 @@ class ContractController:
         except Exception as err:
             self.session.rollback()
             print("error", err)
+            self.view.display_error(f"Error Exception : {err}")
+            logger.info("Error exception : " + str(err))
 
     def update_contract(self, customer: models.Customer):
         """
@@ -155,34 +132,48 @@ class ContractController:
 
         try:
             contract_to_manage = self.get_contract(customer)
-            self.view.display_contract_informations(contract_to_manage)
+            if contract_to_manage is not None:
+                self.view.display_contract_informations(contract_to_manage)
 
-            if (
-                contract_to_manage.is_signed
-                and contract_to_manage.remaining_amount == 0
-            ):
-                return print("CONTRACT ALREADY SIGNED AND PAID")
-
-            if not contract_to_manage.is_signed:
-                contract_to_manage.is_signed = (
-                    self.view.input_contract_signed()
-                )
-
-            if contract_to_manage.remaining_amount > 0:
-                contract_to_manage.remaining_amount = (
-                    self.view.input_contract_remaining_amount(
-                        contract_to_manage.remaining_amount,
-                        contract_to_manage.total_amount,
+                if (
+                    contract_to_manage.is_signed
+                    and contract_to_manage.remaining_amount == 0
+                ):
+                    return self.view.display_error(
+                        constantes.CONTRACT_CONTROLLER_CONTRACT_SIGNED_PAID
                     )
-                )
-            contract_to_manage.creation_date = datetime.now()
-            self.session.commit()
-            return self.view.display_update_contract_validation()
+
+                if not contract_to_manage.is_signed:
+                    contract_to_manage.is_signed = (
+                        self.view.input_contract_signed()
+                    )
+
+                if contract_to_manage.remaining_amount > 0:
+                    contract_to_manage.remaining_amount = (
+                        self.view.input_contract_remaining_amount(
+                            contract_to_manage.remaining_amount,
+                            contract_to_manage.total_amount,
+                        )
+                    )
+                contract_to_manage.creation_date = datetime.now()
+                self.session.commit()
+                if contract_to_manage.is_signed:
+                    logger.info(
+                        "Contract successfully Signed : for customer: "
+                        + str(contract_to_manage.customer.first_name)
+                        + " "
+                        + str(contract_to_manage.customer.last_name)
+                        + " sales : "
+                        + str(contract_to_manage.user.full_name)
+                    )
+                return self.view.display_update_contract_validation()
         except ValueError as err:
-            print("error", err)
+            self.view.display_error(f"ValueError : {err}")
+            logger.info("Update Contract Value error " + err)
         except Exception as err:
             self.session.rollback()
-            print("error", err)
+            logger.info("Update Contract exception error " + err)
+            self.view.display_error(f"Error Exception : {err}")
 
     def get_contract(self, customer: models.Customer) -> models.Contract:
         """
@@ -204,6 +195,8 @@ class ContractController:
         )
         if contract is None:
             self.view.display_no_contract_found()
+            return None
+
         return contract
 
     def list_contracts(self):

@@ -1,5 +1,5 @@
 import models
-
+import constantes
 import validators
 import views
 from datetime import datetime
@@ -72,7 +72,7 @@ class CustomerController:
             None
         """
         if self.user is None:
-            print("No user is currently logged in.")
+            self.view.display_error(constantes.CUSTOMER_CONTROLLER_NO_USER)
 
         new_customer_input = self.view.input_customer_information()
         new_customer = models.Customer(
@@ -89,7 +89,8 @@ class CustomerController:
             return self.view.display_new_customer_validation()
         except Exception as err:
             self.session.rollback()
-            print("error", err)
+            self.view.display_error(f"Error Exception : {err}")
+            logger.info("Error Exception " + err)
 
     def set_new_customer_email(self):
         """
@@ -113,7 +114,8 @@ class CustomerController:
                 email = email_input
                 continue
             except ValueError as err:
-                print("error", err)
+                self.view.display_error(f"ValueError : {err}")
+                logger.info("ValueError " + err)
                 continue
         return email
 
@@ -137,7 +139,9 @@ class CustomerController:
             self.session.query(models.User).filter_by(email=email).first()
             is not None
         ):
-            raise print("EMAIL ALREADY EXISTS")
+            self.view.display_error(
+                constantes.CUSTOMER_CONTROLLER_EMAIL_EXISTS
+            )
 
     def set_customer_phone(self):
         """
@@ -160,7 +164,8 @@ class CustomerController:
                 phone = phone_input
                 continue
             except ValueError as err:
-                print("error", err)
+                self.view.display_error(f"ValueError : {err}")
+                logger.info("ValueError " + err)
                 continue
         return phone
 
@@ -181,17 +186,20 @@ class CustomerController:
         """
         try:
             customer = self.get_customer(self.user)
-            self.view.display_customer_information(customer)
+            if customer is not None:
+                self.view.display_customer_information(customer)
 
-            update_customer_input = self.view.input_customer_information()
-            customer.phone_number = self.set_customer_phone()
-            customer.first_name = update_customer_input["first_name"]
-            customer.last_name = update_customer_input["last_name"]
-            customer.compagny_name = update_customer_input["compagny_name"]
-            customer.last_contact_date = datetime.now()
-            self.session.commit()
+                update_customer_input = self.view.input_customer_information()
+                customer.phone_number = self.set_customer_phone()
+                customer.first_name = update_customer_input["first_name"]
+                customer.last_name = update_customer_input["last_name"]
+                customer.compagny_name = update_customer_input["compagny_name"]
+                customer.last_contact_date = datetime.now()
+                self.session.commit()
+                self.view.display_update_customer_validation()
         except ValueError as err:
-            print("error", err)
+            self.view.display_error(f"ValueError : {err}")
+            logger.info("ValueError " + err)
 
     def get_customer(self, user: models.User = None):
         """
@@ -218,7 +226,8 @@ class CustomerController:
             self.session.query(models.Customer).filter_by(**filters).first()
         )
         if customer is None:
-            raise ValueError("NO CONTRACT FOR THIS CUSTOMER")
+            self.view.display_not_your_customer()
+
         return customer
 
     def list_customers(self):
@@ -233,12 +242,8 @@ class CustomerController:
             None
         """
 
-        logger.debug("Début de la méthode list_customers")
         customers = self.session.query(models.Customer).all()
         if len(customers) == 0:
             return self.view.display_customer_not_found()
 
         self.view.display_customer_information(customers)
-
-        # for customer in customers:
-        #     self.view.display_customer_information(customer)

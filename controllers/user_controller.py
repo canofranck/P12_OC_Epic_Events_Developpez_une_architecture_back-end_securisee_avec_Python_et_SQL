@@ -186,7 +186,7 @@ class UserController:
                 views.MainView.clear_screen(self)
                 self.delete_user()
             case _:
-                print("input invalide")
+                self.view.display_error(constantes.MAIN_CONTROLLER_ERR_INPUT)
 
         return
 
@@ -214,14 +214,12 @@ class UserController:
         try:
             self.session.add(new_user)
             self.session.commit()
-            logger.info(
-                "User : " + new_user.full_name + " created with success "
-            )
+            logger.info("Create User : " + new_user.full_name + "  success ")
 
             return self.view.display_new_user_validation()
         except Exception as err:
             logger.info(
-                "User : " + new_user.full_name + " not created",
+                "Create User : " + new_user.full_name + " failed",
             )
 
             self.session.rollback()
@@ -247,7 +245,8 @@ class UserController:
                 email = email_input
                 continue
             except ValueError as err:
-                print("error", err)
+                self.view.display_error(f"ValueError : {err}")
+                logger.info("ValueError " + err)
                 continue
         return email
 
@@ -265,7 +264,9 @@ class UserController:
             self.session.query(models.User).filter_by(email=email).first()
             is not None
         ):
-            print("email already exist")
+            self.view.display_error(
+                constantes.CUSTOMER_CONTROLLER_EMAIL_EXISTS
+            )
 
     def set_new_user_password(self):
         """
@@ -285,7 +286,8 @@ class UserController:
                 password = password_input
                 continue
             except ValueError as err:
-                self.view.display_error(err)
+                self.view.display_error(f"ValueError : {err}")
+                logger.info("ValueError " + err)
                 continue
         return password
 
@@ -306,7 +308,8 @@ class UserController:
                 return phone_input
 
             except ValueError as err:
-                print("error", err)
+                self.view.display_error(f"ValueError : {err}")
+                logger.info("ValueError " + err)
 
     def update_user(self):
         """
@@ -331,10 +334,11 @@ class UserController:
             user.phone_number = update_user_input["phone_number"]
             user.role_id = update_user_input["role_id"]
             self.session.commit()
-            logger.info("Update user " + user.full_name + " success")
+            logger.info("Update user : " + user.full_name + " success")
             return self.view.display_update_user_validation()
         except ValueError as err:
-            print("error", err)
+            logger.info("Update user : " + user.full_name + " failed")
+            self.view.display_error(err)
 
     def delete_user(self):
         """
@@ -351,8 +355,10 @@ class UserController:
             user = self.get_user()
             self.session.delete(user)
             self.session.commit()
+            logger.info("Delete user : " + user.full_name + " success")
             return self.view.display_delete_user_validation()
         except ValueError:
+            logger.info("Delete user : " + user.full_name + " failed")
             return
 
     def get_user(self):

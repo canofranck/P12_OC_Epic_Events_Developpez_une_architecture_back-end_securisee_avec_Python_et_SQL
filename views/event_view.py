@@ -197,7 +197,9 @@ class EventView(views.BaseView):
             Panel(" -- List Events Filters --", expand=True), style="menu_text"
         )
         self.console.print(
-            "[menu_choice]" + constantes.LIST_EVENTS + " - No filters [/]"
+            "[menu_choice]"
+            + constantes.SALES_LIST_EVENT_NO_FILTER
+            + " - No filters [/]"
         )
         self.console.print(
             "[menu_choice]"
@@ -214,7 +216,7 @@ class EventView(views.BaseView):
         while list_event_filter == "":
             try:
                 list_event_filter = int(input())
-                if list_event_filter < 0 or list_event_filter > 2:
+                if list_event_filter < 0 or list_event_filter > 3:
                     list_event_filter = ""
                     self.console.print("[error]bad input[/]")
                     continue
@@ -300,3 +302,10 @@ class EventView(views.BaseView):
         Displays a message indicating that no events were found.
         """
         self.console.print("[error]No events found.[/]")
+        self.wait_for_key_press()
+
+    def display_error(self, message):
+        """
+        Displays an error message.
+        """
+        self.console.print(f"[error] {message} [/]")
