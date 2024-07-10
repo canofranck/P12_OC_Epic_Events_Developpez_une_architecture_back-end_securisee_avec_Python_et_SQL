@@ -108,7 +108,6 @@ class ContractController:
             return self.view.display_new_contract_validation()
         except Exception as err:
             self.session.rollback()
-            print("error", err)
             self.view.display_error(f"Error Exception : {err}")
             logger.info("Error exception : " + str(err))
 

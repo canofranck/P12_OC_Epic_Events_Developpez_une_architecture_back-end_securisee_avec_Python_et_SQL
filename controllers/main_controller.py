@@ -465,6 +465,5 @@ class MainController:
         self.customer_controller.user = None
         self.contract_controller.user = None
         self.event_controller.user = None
-        # exit
         sentry_sdk.flush()
         exit()

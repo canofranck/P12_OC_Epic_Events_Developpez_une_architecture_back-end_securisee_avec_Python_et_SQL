@@ -39,18 +39,13 @@ class Contract(Base):
 
     def __init__(
         self,
-        # customer_id,
-        # manager_id,
         total_amount,
         remaining_amount,
-        # creation_date,
         is_signed=False,
         user=None,
         customer=None,
     ):
 
-        # self.customer_id = customer_id
-        # self.manager_id = manager_id
         self.total_amount = total_amount
         self.remaining_amount = remaining_amount
         self.creation_date = datetime.now()

@@ -261,7 +261,6 @@ class EventController:
 
             filters = []
         elif event_filters_input == 2:
-            # Filter events of the user
             filters.append(
                 or_(
                     models.Event.contract.has(manager_id=self.user.id),
@@ -269,7 +268,6 @@ class EventController:
                 )
             )
         elif event_filters_input == 3:
-            # Filter events that the user manages and events without support
             filters.append(
                 models.Event.support_id == None,
             )
@@ -277,7 +275,6 @@ class EventController:
         if filters:
             events = self.session.query(models.Event).filter(*filters).all()
         else:
-            # If no filter is selected, display all events
             events = self.session.query(models.Event).all()
 
         if len(events) == 0:

@@ -37,7 +37,7 @@ class BaseView:
         """
         Waits for the user to press a key before continuing.
         """
-        print("Appuyez sur une touche pour continuer...")
+        print("Press a key ton continue ...")
         if os.name == "nt":
             msvcrt.getch()
             views.MainView.clear_screen(self)

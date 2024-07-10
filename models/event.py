@@ -31,8 +31,6 @@ class Event(Base):
 
     def __init__(
         self,
-        # support_id,
-        # contract_id,
         event_name,
         customer_name,
         customer_contact,
@@ -55,8 +53,6 @@ class Event(Base):
         self.notes = notes
         self.user = user
         self.contract = contract
-        # self.support_id = support_id
-        # self.contract_id = contract_id
 
     def __str__(self):
         return f"Event {self.id} - Name: {self.event_name} - Start: {self.start_date} - End: {self.end_date} - Location: {self.location} - Attendees: {self.nb_attendees}"

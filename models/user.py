@@ -1,6 +1,5 @@
 import os
 from typing import List
-import uuid
 import bcrypt
 from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy import (
@@ -22,24 +21,7 @@ from models.base import Base
 import logging
 
 
-# logging.basicConfig(level=logging.DEBUG)
-# logger = logging.getLogger(__name__)
-
-# salt = b"$2b$12$QhTfGmCB1FrbuySv8Op4IO"
-
 salt = os.getenv("salt")
-# class UserPermission:
-#     pass
-
-
-# class UserRole(enum.Enum):
-#     MANAGER = 1
-#     SALES = 2
-#     SUPPORT = 3
-#     ADMIN = 4
-
-#     def __str__(self):
-#         return self.name
 
 
 class User(Base):
