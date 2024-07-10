@@ -341,6 +341,8 @@ class MainController:
         self.view.display_manage_contract()
         try:
             customer_to_manage = self.customer_controller.get_customer()
+            if customer_to_manage is None:
+                return
             return self.contract_controller.manage_contracts(
                 customer_to_manage
             )
@@ -364,6 +366,8 @@ class MainController:
             customer_to_manage = self.customer_controller.get_customer(
                 self.user
             )
+            if customer_to_manage is None:
+                return
             self.contract_controller.update_contract(customer_to_manage)
         except ValueError as err:
             self.view.display_error(f"error : {err}")
@@ -386,6 +390,9 @@ class MainController:
             customer_to_manage = self.customer_controller.get_customer(
                 self.user
             )
+            if not customer_to_manage:
+                return
+
             contract_to_manage = self.contract_controller.get_contract(
                 customer_to_manage
             )

@@ -115,6 +115,21 @@ class EventController:
 
         try:
             event_to_update = self.get_event(assigned_support)
+            if event_to_update is None:
+                return
+            if support_user is not None:
+                event_to_update.user = support_user
+            else:
+                start_date, end_date = self.set_new_event()
+                event_to_update.location = self.view.input_event_location()
+                event_to_update.nb_attendees = (
+                    self.view.input_event_nb_attendees()
+                )
+                event_to_update.notes = self.view.input_event_notes()
+                event_to_update.start_date = start_date
+                event_to_update.end_date = end_date
+
+            self.session.commit()
             table = Table(title="Liste des events")
             table.add_column("Event Name")
             table.add_column("Event ID")
@@ -156,20 +171,6 @@ class EventController:
                 support_email,
             )
             self.view.display_event(event_to_update, table)
-
-            if support_user is not None:
-                event_to_update.user = support_user
-            else:
-                start_date, end_date = self.set_new_event()
-                event_to_update.location = self.view.input_event_location()
-                event_to_update.nb_attendees = (
-                    self.view.input_event_nb_attendees()
-                )
-                event_to_update.notes = self.view.input_event_notes()
-                event_to_update.start_date = start_date
-                event_to_update.end_date = end_date
-
-            self.session.commit()
             return self.view.display_update_event_validation()
         except ValueError as err:
             self.view.display_error(f"ValueError : {err}")
@@ -244,6 +245,7 @@ class EventController:
             self.view.display_error(
                 constantes.EVENT_CONTROLLER_EVENT_NOT_FOUND
             )
+            return
         return event
 
     def list_events(self):

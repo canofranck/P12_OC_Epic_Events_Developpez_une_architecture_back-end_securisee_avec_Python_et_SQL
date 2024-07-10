@@ -218,7 +218,7 @@ class CustomerView(views.BaseView):
         Displays a message indicating that a customer was not found.
         """
         self.console.print(
-            "the customer contract is not assigned to you", style="error"
+            "the customer is not assigned to you", style="error"
         )
         self.wait_for_key_press()
 

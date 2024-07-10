@@ -61,10 +61,12 @@ class ContractController:
         Returns:
             None
         """
+
         contract_to_manage = self.get_contract(customer)
         if contract_to_manage is not None:
             self.view.display_contract_informations(contract_to_manage)
 
+        self.view.display_manage_contract()
         menu_selection = self.view.input_contract_management()
         match menu_selection:
             case 0:

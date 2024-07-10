@@ -94,7 +94,7 @@ class UserView(views.BaseView):
         Returns:
             str: The user's email address.
         """
-        self.console.print("Entrez votre email : ", style="input")
+        self.console.print("Enter email : ", style="input")
         return input()
 
     def input_password(self):

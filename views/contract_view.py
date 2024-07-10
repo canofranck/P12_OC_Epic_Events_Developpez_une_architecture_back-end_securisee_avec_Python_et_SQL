@@ -267,3 +267,12 @@ class ContractView(views.BaseView):
         Displays an error message.
         """
         self.console.print(f"[error] {message} [/]")
+
+    def display_manage_contract(self):
+        """
+        Displays a panel with the title "Manage Contract".
+        """
+        self.console.print(
+            Panel("---   Manage Contract   ---", expand=True),
+            style="menu_text",
+        )
