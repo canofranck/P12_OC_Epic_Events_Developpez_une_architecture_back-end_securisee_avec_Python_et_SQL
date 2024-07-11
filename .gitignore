@@ -4,7 +4,7 @@
 /ENV/
 .env
 __pycache__/
-token_*
+token.txt
 /to delete/
 
 

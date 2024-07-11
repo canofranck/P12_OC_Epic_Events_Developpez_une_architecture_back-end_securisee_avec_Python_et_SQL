@@ -355,10 +355,14 @@ class UserController:
             user = self.get_user()
             self.session.delete(user)
             self.session.commit()
-            logger.info("Delete user : " + user.full_name + " success")
-            return self.view.display_delete_user_validation()
+            self.view.display_delete_user_validation()
+            if user:
+                logger.info("Delete user : " + user.full_name + " success")
+            return
         except ValueError:
-            logger.info("Delete user : " + user.full_name + " failed")
+            self.view.display_new_user_error()
+            if user:
+                logger.info("Delete user : " + user.full_name + " failed")
             return
 
     def get_user(self):
@@ -375,7 +379,8 @@ class UserController:
         user = self.session.query(models.User).filter_by(email=email).first()
 
         if user is None:
-            raise ValueError(constantes.ERR_USER_NOT_FOUND)
+            self.view.display_error(constantes.ERR_USER_NOT_FOUND)
+            return user == None
         return user
 
     def is_password_correct(self, input_password, user):
