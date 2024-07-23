@@ -158,17 +158,17 @@ class EventController:
                 else ""
             )
             table.add_row(
-                event_to_update.event_name,
+                str(event_to_update.event_name),
                 str(event_to_update.id),
                 str(event_to_update.contract_id),
-                event_to_update.customer_name,
-                sales_contact_name,
+                str(event_to_update.customer_name),
+                str(sales_contact_name),
                 str(event_to_update.start_date),
                 str(event_to_update.end_date),
-                event_to_update.location,
+                str(event_to_update.location),
                 str(event_to_update.nb_attendees),
-                event_to_update.notes,
-                support_email,
+                str(event_to_update.notes),
+                str(support_email),
             )
             self.view.display_event(event_to_update, table)
             return self.view.display_update_event_validation()

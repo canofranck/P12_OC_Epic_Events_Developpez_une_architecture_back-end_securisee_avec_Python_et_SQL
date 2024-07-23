@@ -48,7 +48,7 @@ def new_mock_contract_controller():
     mock_session = MagicMock()
     mock_view = MagicMock()
 
-    mock_contract_controller = controllers.contractController(
+    mock_contract_controller = controllers.ContractController(
         session=mock_session, view=mock_view
     )
 

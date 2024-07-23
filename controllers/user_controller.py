@@ -338,7 +338,7 @@ class UserController:
             return self.view.display_update_user_validation()
         except ValueError as err:
             logger.info("Update user : " + user.full_name + " failed")
-            self.view.display_error(err)
+            self.view.display_error(f"Valuerror : {err}")
 
     def delete_user(self):
         """

@@ -64,8 +64,14 @@ class ContractView(views.BaseView):
         Returns:
             str: The total amount for the contract.
         """
-        self.console.print("Total amount : ", style="input")
-        return input()
+        while True:
+            self.console.print("Total amount : ", style="input")
+            try:
+                total_amount = input()
+                # Validate input here if needed
+                return total_amount
+            except Exception as e:
+                self.console.print(f"[error] {e} [/]")
 
     def input_contract_remaining_amount(self, remaining_amount, total_amount):
         """

@@ -133,14 +133,14 @@ class CustomerView(views.BaseView):
         """
 
         table = Table(title="Listing clients")
-        table.add_column("First name")
-        table.add_column("Last name")
-        table.add_column("Phone number")
-        table.add_column("Email")
-        table.add_column("Company name")
-        table.add_column("Commercial contact")
-        table.add_column("Creation date")
-        table.add_column("Last contact")
+        table.add_column("First name", style="menu_choice")
+        table.add_column("Last name", style="menu_choice")
+        table.add_column("Phone number", style="menu_choice")
+        table.add_column("Email", style="menu_choice")
+        table.add_column("Company name", style="menu_choice")
+        table.add_column("Commercial contact", style="menu_choice")
+        table.add_column("Creation date", style="menu_choice")
+        table.add_column("Last contact", style="menu_choice")
         try:
             iter(customers)
         except TypeError:

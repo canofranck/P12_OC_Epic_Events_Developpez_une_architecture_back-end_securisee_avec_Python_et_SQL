@@ -170,10 +170,10 @@ class ContractController:
                 return self.view.display_update_contract_validation()
         except ValueError as err:
             self.view.display_error(f"ValueError : {err}")
-            logger.info("Update Contract Value error " + err)
+            logger.info("Update Contract Value error " + str(err))
         except Exception as err:
             self.session.rollback()
-            logger.info("Update Contract exception error " + err)
+            logger.info("Update Contract exception error " + str(err))
             self.view.display_error(f"Error Exception : {err}")
 
     def get_contract(self, customer: models.Customer) -> models.Contract:

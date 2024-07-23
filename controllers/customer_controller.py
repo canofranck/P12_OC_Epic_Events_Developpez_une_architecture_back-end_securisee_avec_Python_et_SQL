@@ -115,7 +115,7 @@ class CustomerController:
                 continue
             except ValueError as err:
                 self.view.display_error(f"ValueError : {err}")
-                logger.info("ValueError " + err)
+                logger.info("ValueError " + str(err))
                 continue
         return email
 
@@ -165,7 +165,7 @@ class CustomerController:
                 continue
             except ValueError as err:
                 self.view.display_error(f"ValueError : {err}")
-                logger.info("ValueError " + err)
+                logger.info("ValueError " + str(err))
                 continue
         return phone
 
@@ -199,7 +199,7 @@ class CustomerController:
                 self.view.display_update_customer_validation()
         except ValueError as err:
             self.view.display_error(f"ValueError : {err}")
-            logger.info("ValueError " + err)
+            logger.info("ValueError " + str(err))
 
     def get_customer(self, user: models.User = None):
         """
