@@ -93,3 +93,10 @@ Pour avoir la couverture du code tapez :
 ```
     pytest --cov=.
 ```
+![image](./img/couverture.png)
+## Screenshot de l application 
+
+![image](./img/1.png)
+![image](./img/2.png)
+![image](./img/3.png)
+![image](./img/4.png)
