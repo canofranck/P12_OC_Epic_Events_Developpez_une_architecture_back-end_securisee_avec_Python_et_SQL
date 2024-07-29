@@ -3,28 +3,48 @@ from typing import List
 import bcrypt
 from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy import (
-    CHAR,
-    VARCHAR,
     Column,
     ForeignKey,
-    Integer,
     String,
-    UUID,
-    Enum,
 )
-import enum
-
 
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from models.base import Base
-import logging
 
 
 salt = os.getenv("salt")
 
 
 class User(Base):
+    """
+    Represents a user in the database.
+
+    Attributes:
+    -----------
+    id : int
+        Unique identifier for the user.
+    username : str
+        The username of the user.
+    password : str
+        The hashed password of the user.
+    full_name : str
+        The full name of the user.
+    email : str
+        The email address of the user.
+    phone_number : str
+        The phone number of the user.
+    role_id : int
+        Foreign key referencing the role of the user.
+    role : Role
+        The role associated with the user.
+    contracts : List[Contract]
+        List of contracts associated with the user.
+    customers : List[Customer]
+        List of customers managed by the user.
+    events : List[Event]
+        List of events managed by the user.
+    """
 
     __tablename__ = "users"
 
@@ -59,6 +79,24 @@ class User(Base):
         role_id,
         password=None,
     ):
+        """
+        Initializes a new User instance.
+
+        Parameters:
+        -----------
+        username : str
+            The username of the user.
+        full_name : str
+            The full name of the user.
+        email : str
+            The email address of the user.
+        phone_number : str
+            The phone number of the user.
+        role_id : int
+            The role identifier for the user.
+        password : str, optional
+            The plain text password of the user (default is None).
+        """
         if password:
             self.set_password(password)
 
@@ -69,6 +107,14 @@ class User(Base):
         self.phone_number = phone_number
 
     def __str__(self):
+        """
+        Returns a string representation of the user.
+
+        Returns:
+        --------
+        str
+            A string containing the user details.
+        """
         return (
             f"User Name: {self.username} "
             f"Full Name: {self.full_name} "
@@ -77,6 +123,14 @@ class User(Base):
         )
 
     def set_password(self, password: str) -> None:
+        """
+        Sets the password for the user by hashing it.
+
+        Parameters:
+        -----------
+        password : str
+            The plain text password to be hashed and set for the user.
+        """
         bytes = password.encode("utf-8")
         hash_password = bcrypt.hashpw(bytes, salt.encode("utf-8"))
         self.password = hash_password.decode("utf-8")

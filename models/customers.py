@@ -17,6 +17,34 @@ from typing import List
 
 
 class Customer(Base):
+    """
+    Représente un client dans la base de données.
+
+    Attributs:
+    ----------
+    id : int
+        Identifiant unique du client.
+    sales_id : int
+        Clé étrangère référencant l'utilisateur responsable des ventes pour ce client.
+    user : User
+        L'utilisateur associé au client.
+    contracts : List[Contract]
+        Liste des contrats associés au client.
+    first_name : str
+        Prénom du client.
+    last_name : str
+        Nom de famille du client.
+    email : str
+        Adresse e-mail du client.
+    phone_number : str
+        Numéro de téléphone du client.
+    compagny_name : str
+        Nom de la société du client.
+    creation_date : datetime
+        Date et heure de création de l'enregistrement du client.
+    last_contact_date : datetime
+        Date et heure du dernier contact avec le client.
+    """
 
     __tablename__ = "customers"
 
@@ -47,6 +75,24 @@ class Customer(Base):
         compagny_name,
         sales_id,
     ):
+        """
+        Initialise une nouvelle instance de Customer.
+
+        Paramètres:
+        -----------
+        first_name : str
+            Prénom du client.
+        last_name : str
+            Nom de famille du client.
+        email : str
+            Adresse e-mail du client.
+        phone_number : str
+            Numéro de téléphone du client.
+        compagny_name : str
+            Nom de la société du client.
+        sales_id : int
+            Identifiant de l'utilisateur responsable des ventes pour ce client.
+        """
 
         self.first_name = first_name
         self.last_name = last_name
@@ -57,4 +103,12 @@ class Customer(Base):
         self.sales_id = sales_id
 
     def __str__(self):
+        """
+        Retourne une représentation sous forme de chaîne de caractères du client.
+
+        Returns:
+        --------
+        str
+            Une chaîne contenant les détails du client.
+        """
         return f"{self.first_name} {self.last_name} ({self.email})"

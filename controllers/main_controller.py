@@ -43,6 +43,32 @@ class MainController:
 
         get_user_main_menu(self):
             Displays the main menu for the logged-in user and processes their selection.
+
+        process_manager_action(self, menu_selection):
+            Process the menu selection for a manager.
+
+        process_sales_action(self, menu_selection):
+            Process the menu selection for a sales representative.
+
+        process_support_action(self, menu_selection):
+            Process the menu selection for a support representative.
+
+        manage_contract(self):
+            Manage contracts for a customer.
+
+        update_customer_contract_sales(self):
+            Update the sales information for a customer's contract.
+
+        create_event_sales(self):
+            Create a new event for a customer's contract.
+
+        set_support_on_event(self):
+            Set support user on an event.
+
+        logout(self):
+            Logout the current user.
+
+
     """
 
     def __init__(self, session, salt, secret_key, console):

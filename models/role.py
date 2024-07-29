@@ -12,6 +12,19 @@ from models.base import Base
 
 
 class Role(Base):
+    """
+    Represents a role in the database.
+
+    Attributes:
+    -----------
+    id : int
+        Unique identifier for the role.
+    name : str
+        The name of the role.
+    users : list[User]
+        List of users associated with this role.
+    """
+
     __tablename__ = "roles"
 
     id: Mapped[int] = mapped_column(
@@ -22,7 +35,12 @@ class Role(Base):
     users: Mapped[list["User"]] = relationship("User", back_populates="role")
 
     def __str__(self):
-        return self.name
+        """
+        Returns a string representation of the role.
 
-    def __str__(self):
+        Returns:
+        --------
+        str
+            The name of the role.
+        """
         return self.name

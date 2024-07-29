@@ -151,7 +151,14 @@ class ContractView(views.BaseView):
         }
 
     def display_contract_informations(self, contracts: models.Contract):
+        """
+        Displays contract information in a formatted table.
 
+        Parameters:
+        -----------
+        contracts : models.Contract or list[models.Contract]
+            A single contract or a list of contracts to be displayed.
+        """
         table = Table(title="Liste Contrat")
 
         table.add_column("Client First Name")
