@@ -96,6 +96,7 @@ Pour avoir la couverture du code tapez :
     pytest --cov=.
 ```
 ![image](/_img/couverture.png)
+![image](/_img/schema_database.jpg)
 ## Screenshot de l application 
 
 ![image](/_img/1.png)
