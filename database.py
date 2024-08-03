@@ -9,14 +9,15 @@ from models.customers import Customer
 from models.contract import Contract
 from models.event import Event
 from dotenv import load_dotenv
+from constantes import ROLES
 import os
 
 DATABASE_USERNAME = os.getenv("username")
 DATABASE_PASSWORD = os.getenv("password")
 DATABASE_HOST = os.getenv("host")
 DATABASE_NAME = os.getenv("database_name")
-
-DATABASE_URL = f"mysql+mysqlconnector://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@{DATABASE_HOST}/{DATABASE_NAME}"
+DATABASE_PORT = os.getenv("port")
+DATABASE_URL = f"mysql+mysqlconnector://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
 
 
 def database_exists():
@@ -27,8 +28,6 @@ def database_exists():
         bool: True if the database exists, False otherwise.
     """
 
-    print("je suis dans database exist")
-    print(f"database name {DATABASE_NAME}")
     connection = None
     try:
         connection = mysql.connector.connect(
@@ -36,6 +35,7 @@ def database_exists():
             user=DATABASE_USERNAME,
             password=DATABASE_PASSWORD,
             database=DATABASE_NAME,
+            port=DATABASE_PORT,
         )
         cursor = connection.cursor()
         cursor.execute("SELECT DATABASE()")
@@ -56,13 +56,14 @@ def create_database():
     This function connects to the MySQL server and creates a new database with the name specified
     in the DATABASE_NAME variable. If the database already exists, it does nothing.
     """
-    print("je suis dans database creatre")
+
     connection = None
     try:
         connection = mysql.connector.connect(
             host=DATABASE_HOST,
             user=DATABASE_USERNAME,
             password=DATABASE_PASSWORD,
+            port=DATABASE_PORT,
         )
         cursor = connection.cursor()
         cursor.execute(f"CREATE DATABASE {DATABASE_NAME}")
@@ -86,7 +87,7 @@ def init_db():
     Returns:
         SessionLocal: The SQLAlchemy session factory.
     """
-    print("je suis dans database init", database_exists())
+
     if not database_exists():
         create_database()
     engine = create_engine(DATABASE_URL)
@@ -94,8 +95,8 @@ def init_db():
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     # Initialize default roles after creating the tables
     session = SessionLocal()
-    roles = ["MANAGER", "SALES", "SUPPORT", "ADMIN"]
-    for role_name in roles:
+
+    for role_name in ROLES:
         existing_role = session.query(Role).filter_by(name=role_name).first()
         if not existing_role:
             role = Role(name=role_name)

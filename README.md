@@ -39,6 +39,7 @@ ATTENTION : tous les champs du ficher a creer .env ne doivent pas avoir de guill
 username= username de la base 
 password= password de la base
 host= nom du host de la base
+port= port du host de la base
 database_name= nom souhaité pour la base de l application
 salt= clef de salage
 secret_key= clef secrete
@@ -53,6 +54,7 @@ exemple :
 username=root
 password=password
 host=localhost
+port= 3306
 database_name=p12_prod
 salt=$2b$12$aaaaaaaaaaaaaaaaaaa
 secret_key=#aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa

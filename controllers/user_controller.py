@@ -379,7 +379,7 @@ class UserController:
 
         if user is None:
             self.view.display_error(constantes.ERR_USER_NOT_FOUND)
-            return user == None
+            return None
         return user
 
     def generate_token(self, user):

@@ -221,7 +221,7 @@ class EventController:
                 new_date = datetime.strptime(new_date_input, date_format)
                 continue
             except ValueError as err:
-                self.view.display_error(f"ValueError : {err}")
+                self.view.display_error(f"Format invalide")
                 logger.info("ValueError : " + str(err))
                 continue
         return new_date

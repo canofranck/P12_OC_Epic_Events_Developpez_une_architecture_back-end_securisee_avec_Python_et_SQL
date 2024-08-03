@@ -274,6 +274,7 @@ class MainController:
             case constantes.LIST_MANAGER_ASSIGN_EVENT:
                 self.view.clear_screen()
                 self.set_support_on_event()
+                self.get_user_main_menu()
             case constantes.LIST_MANAGER_MANAGE_USER:
                 self.view.clear_screen()
                 self.user_controller.manage_user()
@@ -449,6 +450,8 @@ class MainController:
         try:
             self.user_controller.view.display_support_on_event()
             support_user = self.user_controller.get_user()
+            if support_user is None:
+                return
             support_user_role = (
                 self.session.query(models.Role)
                 .filter_by(id=support_user.role_id)
@@ -456,11 +459,11 @@ class MainController:
             )
             if support_user_role.name != constantes.ROLE_SUPPORT:
                 return self.view.display_not_support_user()
-
             return self.event_controller.update_event(
                 support_user=support_user,
                 assigned_support=None,
             )
+
         except ValueError as err:
             self.view.display_error(f"error : {err}")
             logger.info("ValueError : " + str(err))
