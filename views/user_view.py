@@ -1,9 +1,10 @@
 import models
 import getpass
+from models import role
 import views
 import constantes
 from rich.panel import Panel
-from rich.rule import Rule
+from rich.table import Table
 
 
 class UserView(views.BaseView):
@@ -179,7 +180,7 @@ class UserView(views.BaseView):
         )
 
         self.console.print(
-            "[menu_choice]" + constantes.LOG_OUT + " - Exit [/]"
+            "[menu_choice]" + constantes.MAIN_MENU_BACK + " - Back [/]"
         )
         self.console.print(
             "[menu_choice]"
@@ -196,11 +197,18 @@ class UserView(views.BaseView):
             + constantes.MANAGER_DELETE_USER
             + " - Delete a user [/]"
         )
+        self.console.print(
+            "[menu_choice]"
+            + constantes.MANAGER_LIST_USER
+            + " - List of user [/]"
+        )
         selection = -1
         while selection not in [
+            constantes.MAIN_MENU_BACK,
             constantes.MANAGER_CREATE_NEW_USER,
             constantes.MANAGER_UPDATE_USER,
             constantes.MANAGER_DELETE_USER,
+            constantes.MANAGER_LIST_USER,
         ]:
             self.console.print("Choisissez une option : ", style="input")
             selection = input()
@@ -372,6 +380,11 @@ class UserView(views.BaseView):
             + constantes.LIST_SALES_CREATE_EVENT
             + " - Create an Event for a Customer [/]"
         )
+        self.console.print(
+            "[menu_choice]"
+            + constantes.LIST_SALES_DELETE_EVENT
+            + " - Delete an Event for a Customer [/]"
+        )
 
     def display_support_menu(self):
         """
@@ -443,3 +456,56 @@ class UserView(views.BaseView):
         Displays an error message.
         """
         self.console.print(f"[error]  {message} ")
+
+    def display_user_not_found(self):
+        """
+        Displays a message indicating that a customer was not found.
+        """
+        self.console.print("User not found", style="error")
+
+    def display_list_user(self, users: models.User):
+        """
+        Displays the information of a user.
+
+        Args:
+            users (models.User): The user object to display.
+        """
+
+        table = Table(title="Listing users")
+        table.add_column("User name", style="menu_choice")
+        table.add_column("Full name", style="menu_choice")
+        table.add_column("Phone number", style="menu_choice")
+        table.add_column("Email", style="menu_choice")
+        table.add_column("Role", style="menu_choice")
+
+        try:
+            iter(users)
+        except TypeError:
+            # Si customers n'est pas itérable, considérez-le comme un seul objet
+            user = users
+
+            table.add_row(
+                user.username,
+                user.full_name,
+                user.phone_number,
+                user.email,
+                user.role_id,
+            )
+            table.column_widths = "auto"
+            self.console.print(table)
+
+        else:
+            # users est itérable
+
+            for user in users:
+                table.add_row(
+                    user.username,
+                    user.full_name,
+                    user.phone_number,
+                    user.email,
+                    user.role.name,
+                )
+
+            table.column_widths = "auto"
+            self.console.print(table)
+            self.wait_for_key_press()

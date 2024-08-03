@@ -33,32 +33,22 @@ for handler in logger.handlers[:]:
 sentry_handler = sentry_sdk.integrations.logging.EventHandler()
 sentry_handler.setLevel(logging.DEBUG)
 logger.addHandler(sentry_handler)
+try:
+    # Main program
+    if __name__ == "__main__":
+        session = init_db()
+        main_controller = MainController(
+            session, console=views.themes.theme_console()
+        )
 
-# Main program
-if __name__ == "__main__":
-
-    username = os.getenv("username")
-    password = os.getenv("password")
-    host = os.getenv("host")
-    database_name = os.getenv("database_name")
-    salt = os.getenv("salt")
-    secret_key = os.getenv("secret_key")
-    # Check if the salt is correctly loaded
-    if not salt or not salt.startswith("$2b$"):
-        raise ValueError("The salt is invalid or missing in the .env file")
-
-    session = init_db()
-
-    main_controller = MainController(
-        session, salt, secret_key, console=views.themes.theme_console()
-    )
-
-    try:
-        main_controller.create_admin()
-        main_controller.run()
-    except Exception as e:
-        sentry_sdk.capture_exception(e)
-        logger.info("Error exception : " + str(e))
-    finally:
-        sentry_sdk.flush()
-        session.close()
+        try:
+            main_controller.create_admin()
+            main_controller.run()
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
+            logger.info("Error exception : " + str(e))
+        finally:
+            sentry_sdk.flush()
+            session.close()
+except KeyboardInterrupt as err:
+    print("vous avez quitter le programme")

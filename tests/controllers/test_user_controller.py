@@ -80,35 +80,6 @@ class UserControllerLogin(TestCase):
             )
         )
 
-    # def test_brute_force_protection(self):
-    #     self.controller.view.input_email.side_effect = ["test@free.fr"] * 4
-    #     self.controller.view.input_password.side_effect = ["wrongpw"] * 4
-    #     self.controller.is_password_correct = MagicMock(return_value=False)
-    #     self.controller.session.query.return_value.filter_by.return_value.first.return_value = models.User(
-    #         username="test",
-    #         email="test@free.fr",
-    #         password=bcrypt.hashpw(
-    #             "goodpw".encode("utf-8"), salt.encode("utf-8")
-    #         ).decode("utf-8"),
-    #         full_name="test",
-    #         phone_number="+33110203040",
-    #         role_id=1,
-    #     )
-
-    #     with patch.object(
-    #         self.controller.view, "display_error"
-    #     ) as mock_display_error:
-    #         with self.assertRaises(ValueError) as error:
-    #             for _ in range(4):  # Atteindre le nombre maximal de tentatives
-    #                 self.controller.run_login_menu()
-    #         self.assertEqual(
-    #             str(error.exception),
-    #             "too many attempts, maybe a breakforce attack",
-    #         )
-    #         mock_display_error.assert_called_with(
-    #             constantes.ERR_TOO_MANY_ATTEMPTS
-    #         )
-
 
 class UserControllerManageusers(TestCase):
 

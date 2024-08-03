@@ -13,9 +13,6 @@ from sqlalchemy.orm import mapped_column
 from models.base import Base
 
 
-salt = os.getenv("salt")
-
-
 class User(Base):
     """
     Represents a user in the database.
@@ -46,6 +43,7 @@ class User(Base):
         List of events managed by the user.
     """
 
+    salt = os.getenv("salt")
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -78,6 +76,7 @@ class User(Base):
         phone_number,
         role_id,
         password=None,
+        salt=salt,
     ):
         """
         Initializes a new User instance.
@@ -97,14 +96,15 @@ class User(Base):
         password : str, optional
             The plain text password of the user (default is None).
         """
-        if password:
-            self.set_password(password)
 
         self.username = username
         self.full_name = full_name
         self.role_id = role_id
         self.email = email
         self.phone_number = phone_number
+        self.salt = os.getenv("salt")
+        if password:
+            self.set_password(password)
 
     def __str__(self):
         """
@@ -131,6 +131,23 @@ class User(Base):
         password : str
             The plain text password to be hashed and set for the user.
         """
+        salt = os.getenv("salt")
         bytes = password.encode("utf-8")
-        hash_password = bcrypt.hashpw(bytes, salt.encode("utf-8"))
+        hash_password = bcrypt.hashpw(bytes, self.salt.encode("utf-8"))
         self.password = hash_password.decode("utf-8")
+
+    def is_password_correct(self, input_password):
+        """
+        Checks if the provided password is correct for the user.
+
+        This method hashes the input password using the salt and compares it to the user's password stored in the database.
+        If the passwords match, it returns True. Otherwise, it returns False.
+
+        Returns:
+            is_correct: A boolean indicating whether the password is correct.
+        """
+        salt = os.getenv("salt")
+        input_bytes = input_password.encode("utf-8")
+        hash_input_password = bcrypt.hashpw(input_bytes, salt.encode("utf-8"))
+        is_correct = hash_input_password == self.password.encode("utf-8")
+        return is_correct

@@ -309,3 +309,19 @@ class EventView(views.BaseView):
         Displays an error message.
         """
         self.console.print(f"[error] {message} [/]")
+
+    def display_delete_event_validation(self):
+        """
+        Displays a success message indicating that the event was successfully deleted.
+        """
+        self.console.print("[success]Event successfully deleted[/]")
+        self.wait_for_key_press()
+
+    def display_delete_event(self):
+        """
+        Displays the delete event menu.
+        """
+        self.console.print(
+            Panel("---   DELETE EVENT MENU   ---", expand=True),
+            style="menu_text",
+        )

@@ -94,7 +94,7 @@ class EventController:
         except Exception as err:
             self.session.rollback()
             self.view.display_error(f"Error Exception : {err}")
-            logger.info("Error Exception " + err)
+            logger.info("Error Exception " + str(err))
             return
 
     def update_event(self, support_user=None, assigned_support=None):
@@ -174,7 +174,7 @@ class EventController:
             return self.view.display_update_event_validation()
         except ValueError as err:
             self.view.display_error(f"ValueError : {err}")
-            logger.info("ValueError " + err)
+            logger.info("ValueError " + str(err))
 
     def set_new_event(self):
         """
@@ -194,7 +194,7 @@ class EventController:
                 continue
             except ValueError as err:
                 self.view.display_error(f"ValueError : {err}")
-                logger.info("ValueError " + err)
+                logger.info("ValueError " + str(err))
                 start_date = None
                 end_date = None
                 continue
@@ -222,7 +222,7 @@ class EventController:
                 continue
             except ValueError as err:
                 self.view.display_error(f"ValueError : {err}")
-                logger.info("ValueError " + err)
+                logger.info("ValueError : " + str(err))
                 continue
         return new_date
 
@@ -339,3 +339,28 @@ class EventController:
             support_user=None,
             assigned_support=self.user,
         )
+
+    def delete_event(self):
+        """
+        Deletes an existing customer from the system.
+
+        This method displays the delete event menu and handles the event's selection.
+        Depending on the event's choice, it either deletes the event or returns to the previous menu.
+
+        Returns:
+            None
+        """
+        self.view.display_delete_event()
+        try:
+            event = self.get_event()
+            self.session.delete(event)
+            self.session.commit()
+            self.view.display_delete_event_validation()
+            if event:
+                logger.info("Delete event : " + event.event_name + " success")
+            return
+        except ValueError:
+            self.view.display_new_event_error()
+            if event:
+                logger.info("Delete event : " + event.event_name + " failed")
+            return

@@ -18,13 +18,11 @@ class UserController:
 
     Attributes:
         session: The database session used for database operations.
-        salt: The salt used for hashing passwords.
-        secret_key: The secret key used for encoding and decoding JWT tokens.
         view: The view associated with user operations.
         user: The currently logged-in user.
 
     Methods:
-        __init__(self, session, salt, secret_key, view, user=None):
+        __init__(self, session, view, user=None):
             Initializes the UserController with the given parameters.
 
         run_login_menu(self):
@@ -76,20 +74,17 @@ class UserController:
             Retrieves a user from the database based on their ID extracted from the JWT token.
     """
 
-    def __init__(self, session, salt, secret_key, view, user=None):
+    def __init__(self, session, view, user=None):
         """
         Initializes the UserController with the given parameters.
 
         Args:
             session: The database session used for database operations.
-            salt: The salt used for hashing passwords.
-            secret_key: The secret key used for encoding and decoding JWT tokens.
             view: The view associated with user operations.
             user: The currently logged-in user (default is None).
         """
         self.session = session
-        self.salt = salt
-        self.secret_key = secret_key
+        self.secret_key = os.getenv("secret_key")
         self.view = view
         self.user = user
 
@@ -137,7 +132,7 @@ class UserController:
             max_password_attempts = constantes.MAX_PASSWORD_ATTEMPS
             while password_attempts < max_password_attempts:
                 password = self.view.input_password()
-                if not self.is_password_correct(password, user):
+                if not user.is_password_correct(password):
                     password_attempts += 1
                     if password_attempts >= max_password_attempts:
                         self.view.display_error(
@@ -174,7 +169,8 @@ class UserController:
         selection_menu = self.view.input_user_management()
 
         match selection_menu:
-            case 0:
+            case constantes.MAIN_MENU_BACK:
+                views.MainView.clear_screen(self)
                 return
             case constantes.MANAGER_CREATE_NEW_USER:
                 views.MainView.clear_screen(self)
@@ -185,6 +181,9 @@ class UserController:
             case constantes.MANAGER_DELETE_USER:
                 views.MainView.clear_screen(self)
                 self.delete_user()
+            case constantes.MANAGER_LIST_USER:
+                views.MainView.clear_screen(self)
+                self.list_user()
             case _:
                 self.view.display_error(constantes.MAIN_CONTROLLER_ERR_INPUT)
 
@@ -246,7 +245,7 @@ class UserController:
                 continue
             except ValueError as err:
                 self.view.display_error(f"ValueError : {err}")
-                logger.info("ValueError " + err)
+                logger.info("ValueError : " + str(err))
                 continue
         return email
 
@@ -287,7 +286,7 @@ class UserController:
                 continue
             except ValueError as err:
                 self.view.display_error(f"ValueError : {err}")
-                logger.info("ValueError " + err)
+                logger.info("ValueError : " + str(err))
                 continue
         return password
 
@@ -309,7 +308,7 @@ class UserController:
 
             except ValueError as err:
                 self.view.display_error(f"ValueError : {err}")
-                logger.info("ValueError " + err)
+                logger.info("ValueError : " + str(err))
 
     def update_user(self):
         """
@@ -382,24 +381,6 @@ class UserController:
             self.view.display_error(constantes.ERR_USER_NOT_FOUND)
             return user == None
         return user
-
-    def is_password_correct(self, input_password, user):
-        """
-        Checks if the provided password is correct for the user.
-
-        This method hashes the input password using the salt and compares it to the user's password stored in the database.
-        If the passwords match, it returns True. Otherwise, it returns False.
-
-        Returns:
-            is_correct: A boolean indicating whether the password is correct.
-        """
-
-        input_bytes = input_password.encode("utf-8")
-        hash_input_password = bcrypt.hashpw(
-            input_bytes, self.salt.encode("utf-8")
-        )
-        is_correct = hash_input_password == user.password.encode("utf-8")
-        return is_correct
 
     def generate_token(self, user):
         """
@@ -486,3 +467,21 @@ class UserController:
             )
         except jwt.InvalidTokenError:
             return None
+
+    def list_user(self):
+        """
+        Lists all users in the database.
+
+        This method retrieves all users from the database and displays their information
+        in a formatted table. If no users are found, a message is displayed indicating
+        that no users were found.
+
+        Returns:
+            None
+        """
+
+        users = self.session.query(models.User).all()
+
+        if len(users) == 0:
+            return self.view.display_user_not_found()
+        self.view.display_list_user(users)

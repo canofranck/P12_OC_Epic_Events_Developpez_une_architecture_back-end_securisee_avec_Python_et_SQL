@@ -26,6 +26,9 @@ def database_exists():
     Returns:
         bool: True if the database exists, False otherwise.
     """
+
+    print("je suis dans database exist")
+    print(f"database name {DATABASE_NAME}")
     connection = None
     try:
         connection = mysql.connector.connect(
@@ -53,7 +56,7 @@ def create_database():
     This function connects to the MySQL server and creates a new database with the name specified
     in the DATABASE_NAME variable. If the database already exists, it does nothing.
     """
-
+    print("je suis dans database creatre")
     connection = None
     try:
         connection = mysql.connector.connect(
@@ -83,6 +86,7 @@ def init_db():
     Returns:
         SessionLocal: The SQLAlchemy session factory.
     """
+    print("je suis dans database init", database_exists())
     if not database_exists():
         create_database()
     engine = create_engine(DATABASE_URL)

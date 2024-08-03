@@ -19,8 +19,6 @@ class MainController:
 
     Attributes:
         session: The database session used for database operations.
-        salt: The salt used for hashing passwords.
-        secret_key: The secret key used for encoding and decoding JWT tokens.
         view: The main view of the application.
         user_controller: The controller responsible for user-related operations.
         customer_controller: The controller responsible for customer-related operations.
@@ -29,7 +27,7 @@ class MainController:
         user: The currently logged-in user.
 
     Methods:
-        __init__(self, session, salt, secret_key, console):
+        __init__(self, session, console):
             Initializes the MainController with the given parameters.
 
         run(self):
@@ -71,20 +69,16 @@ class MainController:
 
     """
 
-    def __init__(self, session, salt, secret_key, console):
+    def __init__(self, session, console):
         """
         Initializes the MainController with the given parameters.
 
         Args:
             session: The database session used for database operations.
-            salt: The salt used for hashing passwords.
-            secret_key: The secret key used for encoding and decoding JWT tokens.
             console: The console object used for displaying views.
 
         Attributes:
             session: The database session used for database operations.
-            salt: The salt used for hashing passwords.
-            secret_key: The secret key used for encoding and decoding JWT tokens.
             view: The main view of the application.
             user_controller: The controller responsible for user-related operations.
             customer_controller: The controller responsible for customer-related operations.
@@ -93,11 +87,9 @@ class MainController:
             user: The currently logged-in user.
         """
         self.session = session
-        self.salt = salt
-        self.secret_key = secret_key
         self.view = views.MainView(console)
         self.user_controller = controllers.UserController(
-            session, salt, secret_key, view=views.UserView(console)
+            session, view=views.UserView(console)
         )
         self.customer_controller = controllers.CustomerController(
             session, view=views.CustomerView(console)
@@ -125,31 +117,38 @@ class MainController:
         """
 
         self.view.clear_screen()
-        while True:
-            try:
-                choice = self.view.display_main_menu()
+        if os.path.exists("token.txt"):
+            user = self.user_controller.run_login_menu()
+            self.set_user_to_controllers(user)
+            self.view.clear_screen()
+            self.view.input_welcome_user(user)
+            self.get_user_main_menu()
+        else:
+            while True:
+                try:
+                    choice = self.view.display_main_menu()
 
-                if choice == constantes.MAIN_MENU_LOGIN:
-                    user = self.user_controller.run_login_menu()
-                    self.set_user_to_controllers(user)
-                    self.view.clear_screen()
-                    self.view.input_welcome_user(user)
-                    self.get_user_main_menu()
+                    if choice == constantes.MAIN_MENU_LOGIN:
+                        user = self.user_controller.run_login_menu()
+                        self.set_user_to_controllers(user)
+                        self.view.clear_screen()
+                        self.view.input_welcome_user(user)
+                        self.get_user_main_menu()
 
-                elif choice == constantes.MAIN_MENU_QUIT:
+                    elif choice == constantes.MAIN_MENU_QUIT:
+                        self.view.display_error(
+                            constantes.MAIN_CONTROLLER_ERR_QUIT
+                        )
+                        break
+                    else:
+                        self.view.display_invalid_option_message()
+
+                except Exception as e:
+                    sentry_sdk.capture_exception(e)
                     self.view.display_error(
-                        constantes.MAIN_CONTROLLER_ERR_QUIT
+                        f"Une erreur est survenue. Veuillez consulter les logs pour plus de détails. {e}"
                     )
-                    break
-                else:
-                    self.view.display_invalid_option_message()
-
-            except Exception as e:
-                sentry_sdk.capture_exception(e)
-                self.view.display_error(
-                    f"Une erreur est survenue. Veuillez consulter les logs pour plus de détails. {e}"
-                )
-                logger.info("Error exception : " + str(e))
+                    logger.info("Error exception : " + str(e))
 
     def create_admin(self):
         """
@@ -159,7 +158,9 @@ class MainController:
         If not, it creates a new admin user with the role "MANAGER" and default credentials.
         """
         admin_user = (
-            self.session.query(models.User).filter_by(username="Admin").first()
+            self.session.query(models.User)
+            .filter_by(username=os.getenv("ADMIN_FIRST_NAME"))
+            .first()
         )
         if not admin_user:
             manager_role = (
@@ -319,7 +320,9 @@ class MainController:
             case constantes.LIST_SALES_CREATE_EVENT:
                 self.view.clear_screen()
                 self.create_event_sales()
-
+            case constantes.LIST_SALES_DELETE_EVENT:
+                self.view.clear_screen()
+                self.event_controller.delete_event()
             case _:
                 self.view.display_error(constantes.MAIN_CONTROLLER_ERR_INPUT)
 
